@@ -10,3 +10,7 @@ run = read.csv("joined.csv")
 install.packages("ggplot2")
 ```
 
+```{r}
+head(run)
+```
+
