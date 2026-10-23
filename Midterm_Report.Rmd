@@ -7,5 +7,6 @@ output: pdf_document
 
 ```{r}
 run = read.csv("joined.csv")
+install.packages("ggplot2")
 ```
 
