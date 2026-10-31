@@ -1,16 +1,88 @@
 ---
-title: "Midterm Report"
-author: "Natalie McNamara"
-date: "2026-10-13"
+title: "The Role of Race Context in Collegiate Running Performance"
+author: "Seamus Bygrave, Renee Kafka, and Natalie McNamara"
+date: "11-04-2026"
 output: pdf_document
 ---
 
-```{r}
-run = read.csv("joined.csv")
-install.packages("ggplot2")
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
-```{r}
-head(run)
-```
+## 1. Introduction
+
+### 1.1 Background
+
+Cross country and track are the two main running sports that comprise most of the calendar year for competitive runners, from high school through college and even the professional level. In cross country, runners trek through long distance races over sprawling courses. In track, there is a wide variety of races runners may participate in, from short sprints to many laps around the oval. Cross country occurs during the fall, while track occurs during the winter, spring, and into summer. Unlike sports such as basketball or volleyball, which are most often conducted in controlled environments, the sport of running is highly variable. The courses on which races are held can be very different from each other even if the distances are largely the same. Performance can be highly impacted by weather, conditions, location, time of the season, race stakes, and many other factors. 
+  
+  This project seeks to examine these factors and their influence on U.S. collegiate club running performance in particular. At major institutions, the sport of running generally falls within two levels: the varsity scholarship level and the club running level. The National Intercollegiate Running Club Association (NIRCA) is the main governing body of collegiate running clubs across the United States. These running clubs exist outside the NCAA and varsity scholarship athletics, allowing all runners the opportunity to compete and enjoy the sport. Member athletes can compete in club-sponsored races hosted across the country. They may also participate in regional races where they can compete against NCAA athletes. NIRCA encompasses both club cross country and club track, covering a wide range of races and distances.
+
+### 1.2 Motivation
+
+The tracking of statistics related to running performance is relatively new; whereas statistics have always been at the forefront of athlete analysis in major sports such as football and basketball, it is relatively recently that race data has begun to be seen as a useful tool for understanding the variability that comes with the sport. Online tools such as *Athletic.net* and *TFFRS* were founded in the 2000s to be able to host race results. However, these sites tend to only contain very basic results data: runner name, year, team, placement, overall time, and sometimes the average pace per mile. Thus, it can be hard to put into context the performances of the athletes.
+  
+  There exist some papers written within the past 15-20 years that focus on influencing factors on race-day performance. Several papers have been written examining the impact of weather and environment on marathons, which include "Impact of weather on marathon-running performance" by Ely et al.(2007) and "Impact of environmental parameters on marathon running performance" by El Helou et al. (2012). While these papers determine some favorable conditions that tend to produce stronger athlete performance, they are limited to the marathon distance and weather variables only. It should be noted that marathon athletes and races make up only a fraction of the sport.
+    
+  Researchers at Notre Dame, the founders of the dataset we seek to work with, wrote one of the first papers to use a publicly available running dataset that expands scope beyond the marathon. The paper "Faster Results from a Smarter Schedule: Reframing Collegiate Cross Country through Analysis of the National Running Club Database" by Karr et al. (2025) looks to provide an evidence-based framework on ideal race scheduling at the collegiate level based on athlete improvement trends throughout racing season. With our project, we hope to expand on this idea, identifying the potential causes for fluctuations in athlete performance across many different types of races and focusing on the "uncontrollable" factors on race day. Our research will encompass a wide range of races, environments, and athletes. This can provide insight into how and to what extent certain variables impact the race day so that athletes and coaches may work to contain or exploit the effects of race context.  
+    
+### 1.3 Research Questions 
+  
+The following research questions center around factors that surround races, going beyond variables inherent to the athletes themselves:
+  
+- Do certain weather conditions impact performances across various race lengths differently? If so, how, and to what extent?
+- How might race locations, especially in terms of altitude, climate, and topography, affect athlete performance?
+- Do the stakes of the race (regional, national, NIRCA-only, NCAA-hosted, early season/late season, etc.) push athletes to perform better?  
+
+
+
+## 2. Data
+
+### 2.1 Data Background and Sources
+  
+The data source for this project is the National Running Club Database (NRCD) public dataset, accessible via its Zenodo archive and GitHub repository. Links are found below. The NRCD was originally founded and built by researchers at the University of Notre Dame, led by creator Jonathan A. Karr Jr., to give collegiate club runners the shared results infrastructure that NCAA Division I programs have historically enjoyed. Prior to the NRCD, public running data was heavily restricted, scattered across private spreadsheets or PDFs, or limited to small-scale studies without public downloadable datasets. The reliability and trustworthiness of the NRCD stem from its unique, moderated data collection pipeline. Unlike unverified web scrapes, results are submitted by club athletes and administrators, and then carefully reviewed and approved by moderators before entering the official corpus.
+
+
+### 2.2 General Data Description
+
+This project uses the joined.csv file from the NRCD dataset. The dataset is very large containing 180,768 rows (observations) and 70 columns (variables). The variables in this dataset encompass a wide variety of race factors, ranging from athlete details (gender, grade, team_name, result_time) to race and environment details (meet_city, altitude, event_type, and 21 variables that relate to aspects of the weather, such as wind and temperature). ID variables (result_id, meet_id, sport_id) give each result and event type a unique numerical identifier, while binary variables (regionals, nationals) identify the stakes of the race. From environmental factors to standardized times and venue data across many entries, this sampling of variables gives a glimpse into the breadth of the dataset.  
+  
+This dataset is useful to answer our research questions because it provides us with a wealth of information that goes beyond the race itself, from weather conditions to location and meet details that our research questions will require. The specificity of variables within this set will help us quantify trends and narrow down exactly which factors impact running performance. While traditional public tools like *Athletic.net*, *TFRRS*, and NCAA sites generally only report on basic variables such as runner names, teams, placements, and overall times without contextual depth, our data set has 70 different variables to consider. It includes crucial metrics ranging from exact runner start and end times to situational parameters like altitude, event types, temperatures, humidity, and wind. Because of this depth, we have the ability to look deeper into what affects performance.  
+
+
+## 3. Exploratory Data Analysis
+
+### 3.1 Data Cleaning
+
+*insert content here*
+
+### 3.2 Data Summary
+
+*insert content here*
+
+### 3.3 Research Question Exploration
+
+*insert content here*
+
+### 3.4 Qualitative Analysis
+
+*insert content here*
+
+
+\newpage
+
+## Remaining Biweekly Schedule  
+  
+| Week of    | General Task   | Natalie      | Renee    | Seamus  |
+|------------|----------------|--------------|----------|---------|
+|10/26-11/6  |Midterm Report Turn-In|Explanation of trends seen in initial analysis with visuals.|Explain trends seen in performance and types of weather per season.|Explain trends among environmental factors.|
+|11/9-11/20  |Reflection on Midterm Report| Add any additional questions, identify and conduct additional analysis.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct additional analysis as necessary for uncertainty and other items.|
+|11/23-12/4  |Final Edits to Report, Presentation|Develop final visuals, styling the presentation.|Prepare final visuals and consolidate findings.|Complete all visuals and findings for environmental variables.|
+|12/7-12/14  |Final Paper Turn-In |Polishing of explanations for race stake trends.|Final polish and edit.|Final report edit.|  
+  
+\newpage 
+  
+## References
+
+*WIP*
+
 
