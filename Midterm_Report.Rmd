@@ -23,7 +23,7 @@ The tracking of statistics related to running performance is relatively new; whe
 
   There exist some papers written within the past few years years that examine influencing factors on race-day performance, mainly focused on weather parameters. Many of these papers focus on the marathon distance; for instance, Knechtle et. al (2019) specifically looked at years of Boston Marathon results to determine the relationship between weather conditions, sex, country of origin, and running performance. Another paper by Mantzios et al. (2022) looked into the implications of temperature, humidity, and wind speed on performance in endurance running events across the globe, finding that heat has a particularly strong impact on reducing peak running abilities. While these papers determine some conditions that considerably impact running performance, they are mostly limited to very long distances (10K, marathons, etc.) and tend to focus mostly on weather variables only. Furthermore, these athletes tend to be professional runners and older. It should be noted that marathon athletes and races make up only a fraction of the sport.
 
-  Researchers at Notre Dame, the founders of the dataset we seek to work with, wrote one of the first papers to use a publicly available running dataset that expands scope beyond the marathon. Their paper looks to provide an evidence-based framework on ideal race scheduling at the collegiate level based on athlete improvement trends throughout racing season (Karr et al., 2025). However, their research questions center around the athletes themselves, focusing on their improvement within a season and across multiple seasons. With our project, we hope to specifically examine the outside factors available in this dataset that contribute to the race environment and ultimately influence athlete performance, from weather and topography to race stakes. Our research will fill in some gaps identified earlier, including looking at a wider range of race types and focusing attention on a range of collegiate athletes rather than only professional runners and road racers. In this way, our findings become more relevant to a wider group of runners; it can provide valuable information on which "uncontrollable" factors impact race day the most so athletes can be best prepared to handle them.
+  Researchers at Notre Dame, the founders of the dataset we seek to work with, wrote one of the first papers to use a publicly available running dataset that expands scope beyond the marathon. Their paper looks to provide an evidence-based framework on ideal race scheduling at the collegiate level based on athlete improvement trends throughout racing season (Karr, Fryer, et al., 2026). However, their research questions center around the athletes themselves, focusing on their improvement within a season and across multiple seasons. With our project, we hope to specifically examine the outside factors available in this dataset that contribute to the race environment and ultimately influence athlete performance, from weather and topography to race stakes. Our research will fill in some gaps identified earlier, including looking at a wider range of race types and focusing attention on a range of collegiate athletes rather than only professional runners and road racers. In this way, our findings become more relevant to a wider group of runners; it can provide valuable information on which "uncontrollable" factors impact race day the most so athletes can be best prepared to handle them.
     
 ### 1.3 Research Questions 
   
@@ -39,12 +39,12 @@ The following research questions center around factors that surround races, goin
 
 ### 2.1 Data Background and Sources
   
-This investigation analyzes the public National Running Club Database (NRCD), archived on Zenodo (Karr, 2025). The NRCD was originally founded and built by researchers at the University of Notre Dame, led by creator Jonathan A. Karr Jr., to give collegiate club runners the shared results infrastructure that NCAA Division I programs have historically enjoyed. Prior to the NRCD, public running data was heavily restricted, scattered across private spreadsheets or PDFs, or limited to small-scale studies without public downloadable datasets. The reliability and trustworthiness of the NRCD stem from its unique, moderated data collection pipeline. Unlike unverified web scrapes, results are submitted by club athletes and administrators, and then carefully reviewed and approved by moderators before entering the official corpus.
+This investigation analyzes the public National Running Club Database (NRCD), archived on Zenodo (Karr, Darden, et al., 2026). The NRCD was originally founded and built by researchers at the University of Notre Dame, led by creator Jonathan A. Karr Jr., to give collegiate club runners the shared results infrastructure that NCAA Division I programs have historically enjoyed. Prior to the NRCD, public running data was heavily restricted, scattered across private spreadsheets or PDFs, or limited to small-scale studies without public downloadable datasets. The reliability and trustworthiness of the NRCD stem from its unique, moderated data collection pipeline. Unlike unverified web scrapes, results are submitted by club athletes and administrators, and then carefully reviewed and approved by moderators before entering the official corpus.
 
 
 ### 2.2 General Data Description
 
-This project uses the `joined.csv` file from the NRCD dataset. The dataset is very large containing 180,768 rows (observations) and 70 columns (variables). The variables in this dataset encompass a wide variety of race factors, ranging from athlete details (gender, grade, team_name, result_time) to race and environment details (meet_city, altitude, event_type, and 21 variables that relate to aspects of the weather, such as wind and temperature). ID variables (result_id, meet_id, sport_id) give each result and event type a unique numerical identifier, while binary variables (regionals, nationals) identify the stakes of the race. From environmental factors to standardized times and venue data across many entries, this sampling of variables gives a glimpse into the breadth of the dataset.  
+This project uses the `joined.csv` file from the NRCD dataset. The dataset is very large containing 180,767 rows (observations) and 70 columns (variables). The variables in this dataset encompass a wide variety of race factors, ranging from athlete details (gender, grade, team_name, result_time) to race and environment details (meet_city, altitude, event_type, and 21 variables that relate to aspects of the weather, such as wind and temperature). ID variables (result_id, meet_id, sport_id) give each result and event type a unique numerical identifier, while binary variables (regionals, nationals) identify the stakes of the race. From environmental factors to standardized times and venue data across many entries, this sampling of variables gives a glimpse into the breadth of the dataset.  
   
 This dataset is useful to answer our research questions because it provides us with a wealth of information that goes beyond the race itself, from weather conditions to location and meet details that our research questions will require. The specificity of variables within this set will help us quantify trends and narrow down exactly which factors impact running performance. While traditional public tools like *Athletic.net*, *TFRRS*, and NCAA sites generally only report on basic variables such as runner names, teams, placements, and overall times without contextual depth, our data set has 70 different variables to consider. It includes crucial metrics ranging from exact runner start and end times to situational parameters like altitude, event types, temperatures, humidity, and wind. Because of this depth, we have the ability to look deeper into what affects performance.  
 
@@ -53,7 +53,66 @@ This dataset is useful to answer our research questions because it provides us w
 
 ### 3.1 Data Cleaning
 
-*insert content here*
+The initial dataset contained results from the main collegiate running sports of cross country and track, Because this study focuses specifically on individual running performance, the initial phase of our data cleaning process centered around excluding entries for non-running track events and relay results from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were examined to distinguish eligible running events from other athletic competitions.
+
+```{r}
+run = read.csv('joined.csv')
+dim(run)
+```
+
+```{r}
+library(dplyr)
+library(stringr)
+
+# First, exclude all non-running events and relay races
+
+trues = str_detect(run$event_name, '(\\d{2,5}m)|(Marathon)|(Mile)') &
+        !str_detect(run$event_name, 'x')
+
+only_run = run[trues, ]
+dim(only_run)
+  
+```
+```{r}
+# Next, grab only columns that will pertain to research questions
+# Exclude relay columns, racewalk columns
+
+only_run = only_run %>% select(1:59)
+dim(only_run)
+```
+
+This dataset includes over 20000 rows where the result_ids are duplicated. As a part of the cleaning process, we investigated these rows to determine which ones were exact duplicates. There were 1,653 exact duplicate entries, which left us with 20297 rows that had duplicate `result_id` numbers but were not exact duplicate rows. Initial findings saw that these rows tend to have slight negligible differences in weather measurements, potentially due to multiple weather recordings at a race or track meet. Otherwise, these rows seemed to contain the same result for a unique athlete. 
+
+To prove this finding, we utilized a pipeline that filtered to duplicate result id's; summarizing on the id variables `athlete_id` and `meet_id` helped determine if each duplicated result id had a one-to-one relationship with the athlete and meet. We also used `result_time` to solidify whether these rows contained the same exact result, since the times more strongly identify a unique performance down to the second. Finally, using `count` returned a one-row result indicating that all duplicated result ID's correspond with one unique athlete and result. Thus, we concluded there is a high likelihood these are redundant. We made the decision to accept the first recorded entry for each duplicated result ID, since weather parameters are unlikely to change dramatically in the relatively small amount of race time.
+
+```{r}
+# Filter out exact duplicate entries
+
+only_run = only_run %>% distinct()
+dim(only_run)
+```
+
+```{r}
+# Are remainng duplicate result_ids nearly the same?
+
+dp = only_run %>%
+  group_by(result_id) %>%
+  filter(n() > 1) %>%
+  summarise(
+    rows = n(),
+    athletes = n_distinct(athlete_id),
+    times = n_distinct(result_time),
+    meets = n_distinct(meet_id),
+  ) %>%
+  count(athletes, times, meets)
+
+dp
+```
+
+```{r}
+only_run = only_run %>% distinct(result_id, .keep_all = TRUE)
+dim(only_run)
+```
 
 ### 3.2 Data Summary
 
