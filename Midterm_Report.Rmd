@@ -53,7 +53,7 @@ This dataset is useful to answer our research questions because it provides us w
 
 ### 3.1 Data Cleaning
 
-The initial dataset contained results from the main collegiate running sports of cross country and track, Because this study focuses specifically on individual running performance, the initial phase of our data cleaning process centered around excluding entries for non-running track events and relay results from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were examined to distinguish eligible running events from other athletic competitions.
+The initial dataset contained results from the main collegiate running sports of cross country and track, Because this study focuses specifically on individual running performance, the initial phase of our data cleaning process centered around excluding entries for non-running track events and relay results from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were used to distinguish eligible running events from other athletic competitions.
 
 ```{r}
 run = read.csv('joined.csv')
@@ -74,7 +74,7 @@ dim(only_run)
   
 ```
 ```{r}
-# Next, grab only columns that will pertain to research questions
+# Next, grab only columns that could pertain to research questions
 # Exclude relay columns, racewalk columns
 
 only_run = only_run %>% select(1:59)
@@ -83,7 +83,7 @@ dim(only_run)
 
 This dataset includes over 20000 rows where the result_ids are duplicated. As a part of the cleaning process, we investigated these rows to determine which ones were exact duplicates. There were 1,653 exact duplicate entries, which left us with 20297 rows that had duplicate `result_id` numbers but were not exact duplicate rows. Initial findings saw that these rows tend to have slight negligible differences in weather measurements, potentially due to multiple weather recordings at a race or track meet. Otherwise, these rows seemed to contain the same result for a unique athlete. 
 
-To prove this finding, we utilized a pipeline that filtered to duplicate result id's; summarizing on the id variables `athlete_id` and `meet_id` helped determine if each duplicated result id had a one-to-one relationship with the athlete and meet. We also used `result_time` to solidify whether these rows contained the same exact result, since the times more strongly identify a unique performance down to the second. Finally, using `count` returned a one-row result indicating that all duplicated result ID's correspond with one unique athlete and result. Thus, we concluded there is a high likelihood these are redundant. We made the decision to accept the first recorded entry for each duplicated result ID, since weather parameters are unlikely to change dramatically in the relatively small amount of race time.
+To prove this finding, we utilized a pipeline that filtered to duplicate result id's; summarizing on the ID variables `athlete_id` and `meet_id` helped determine if each duplicated result id had a one-to-one relationship with the athlete and meet. We also used `result_time` to solidify whether these rows contained the same exact result, since the times more strongly identify a unique performance down to the second. Finally, using `count` returned a one-row result indicating that all duplicated result ID's correspond with one unique athlete and result. Thus, we concluded there is a high likelihood these are redundant. We made the decision to accept the first recorded entry for each duplicated result ID, since weather parameters are unlikely to change dramatically in the relatively small amount of race time.
 
 ```{r}
 # Filter out exact duplicate entries
@@ -93,7 +93,7 @@ dim(only_run)
 ```
 
 ```{r}
-# Are remainng duplicate result_ids nearly the same?
+# Are remaining duplicate result_ids nearly the same?
 
 dp = only_run %>%
   group_by(result_id) %>%
@@ -113,6 +113,60 @@ dp
 only_run = only_run %>% distinct(result_id, .keep_all = TRUE)
 dim(only_run)
 ```
+
+For key variables, which include ID variables, location, race classification, race distance, gender, and result time, there is rarely missing data. However, weather and climate variables experience more missing data; according to Karr, Fryer, et al. (2026), "meets from August 2023 onward carry comprehensive course distance, elevation gain and loss, weather at race time, and track venue metadata." Data on meets prior to this have much more limited information on weather, and indoor track meets will, of course, not have weather data present. It is not simple to fill in this missing metadata since each meet and athlete is unique while weather is highly variable; it is also not ideal to just simply omit rows without this metadata as most entries without it are still valid and valuable to other analysis. Thus, it was decided that a boolean variable `weather_true` would be created to help filter on entries that include data; this way, the original data is preserved, while weather analysis can simply filter on this new variable.
+
+The new variable `weather_true` was built based on the `temperature` variable, which is always present for every entry that contains weather data.
+
+```{r}
+# Show that temperature is always present for every entry with weather
+# Should return zero rows since it is always present with other weather
+only_run %>%
+  filter(is.na(temperature) & !is.na(humidity)) %>%
+  nrow()
+
+# Create new variable to filter on
+only_run = only_run %>%
+  mutate(weather_true = !is.na(temperature))
+```
+
+There is a general set of weather variables always present together, including ones like `temperature`, `dew_point`, and `humidity`. Some niche weather variables simply don't have enough data to justify including them in analysis. **Renee please finish this part, try to justify why you might not use particular columns by showing like percent missing or whatever works. And then any other weather variables you want to clean.** 
+
+The variable `event_type` could be very valuable for RQ3 in terms of the stakes of the race (prelims, finals, championship, etc.), but there are many missing values. Furthermore, when investigating unique event types, there are some typos and slight differences between names that cause the same event type to be essentially duplicated. To clean this variable, we first standardized existing names. Typos were addressed, and synonyms were combined into a single event type; "A" and "B" races were combined regardless of gender since a gender variable already exists to differentiate between them. Filling in missing values here is not as difficult because...
+
+*Filling in na's natalie finish*
+
+```{r}
+# Investigate messy event_type variable
+# only_run %>%
+  # count(event_type, sort = TRUE)
+
+# unique(only_run$event_type)
+```
+```{r}
+only_run = only_run %>%
+  mutate(event_type = case_when(
+    event_type %in% c("Final", "Finals", "FInals") ~ "Finals",
+    event_type %in% c("Prelims", "Pelims", "1st Round",
+                      "Round 1", "Qualifying") ~ "Prelims",
+    event_type %in% c("Invite", "Invitational") ~ "Invitational",
+    event_type %in% c("FR/SO", "Freshman/Sophmore",
+                      "Freshman/Sophomore") ~ "Freshman/Sophomore",
+    event_type %in% c("JR/SR/GRAD", "Junior/Senior/Grad") ~ "Junior/Senior/Grad",
+    event_type %in% c("A Race", "Men A", "Women A",
+                      "Men's A Race", "Women's A Race") ~ "A Race",
+    event_type %in% c("B Race", "Men B", "Women B",
+                      "Men's B Race", "Women's B Race") ~ "B Race",
+    event_type == "" & regionals == FALSE & nationals == FALSE &
+  sport_name == "Cross Country" ~ "Regular Season",
+    TRUE ~ event_type
+  ))
+
+unique(only_run$event_type)
+only_run %>%
+  count(event_type, sort = TRUE)
+```
+
 
 ### 3.2 Data Summary
 
