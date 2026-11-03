@@ -303,8 +303,113 @@ ggplot(event_summary, aes(x = count, y = reorder_within(event_name, count, sport
 ```
 
 
-### Location Altitude Elevation 
-tes test test
+
+### Numerical Summaries for Altitude, Elevation Gain/Loss
+
+```{r}
+only_run %>%
+  summarise(
+    altitude_mean = mean(altitude, na.rm = TRUE),
+    altitude_median = median(altitude, na.rm = TRUE),
+    altitude_sd = sd(altitude, na.rm = TRUE),
+    altitude_min = min(altitude, na.rm = TRUE),
+    altitude_max = max(altitude, na.rm= TRUE),
+    
+    gain_mean = mean(elevation_gain, na.rm = TRUE),
+    gain_median = median(elevation_gain, na.rm = TRUE),
+    gain_sd = sd(elevation_gain, na.rm = TRUE),
+    gain_min = min(elevation_gain, na.rm = TRUE),
+    gain_max = max(elevation_gain, na.rm= TRUE),
+    
+    loss_mean = mean(elevation_loss, na.rm = TRUE),
+    loss_median = median(elevation_loss, na.rm = TRUE),
+    loss_sd = sd(elevation_loss, na.rm = TRUE),
+    loss_min = min(elevation_loss, na.rm = TRUE),
+    loss_max = max(elevation_loss, na.rm= TRUE)
+  )
+```
+
+### Graphical/Numerical Summaries for Meet Location
+
+```{r}
+
+only_run %>%
+  count(meet_state, sort = TRUE)
+
+only_run %>%
+  summarise(
+    states = n_distinct(meet_state),
+    cities = n_distinct(meet_city),
+    meets = n_distinct(meet_id)
+  )
+
+library(ggplot2)
+
+ggplot(only_run, aes(x = meet_state)) + 
+  geom_bar() + 
+  coord_flip() 
+  labs(
+    title = "Number of Races by State",
+    x = "State",
+    y = "Number of Races"
+  )
+```
+
+### Graphical Summary for Race Altitude
+
+```{r}
+ggplot(only_run, aes(x = altitude)) + 
+  geom_histogram(bins = 30) +
+  labs(
+    title = "Distribution of Race Altitude", 
+    x = "Altitude",
+    y = "Number of Races"
+  )
+
+
+```
+
+### Runner Gender
+
+```{r}
+only_run %>%
+  count(gender_1) %>% 
+  mutate(percent = n / sum(n) * 100)
+
+ggplot(only_run, aes(x = gender_1)) + 
+  geom_bar() + 
+  labs(
+    title = "Number of Race Results by Gender",
+    x = "Gender",
+    y = "Number of Race Results"
+  )
+```
+
+
+### Team Name Location
+
+```{r}
+only_run %>% 
+  summarise(
+    teams = n_distinct(team_name)
+  )
+
+only_run %>%
+  count(team_name, sort = TRUE)
+
+only_run %>% 
+  count(team_name, sort = TRUE) %>%
+  slice_head(n = 15) %>%
+  ggplot(aes(x = reorder(team_name, n), y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top 15 Teams by Number of Race Results",
+    x = "Team",
+    y = "Number of Race Results"
+  )
+```
+
 
 ### 3.3 Research Question Exploration
 
