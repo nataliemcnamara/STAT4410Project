@@ -250,6 +250,9 @@ length(unique(only_run$event_name))
 dim(only_run)
 ```
 
+#### Selection of Running Events
+
+After looking at the weather-data availability, we restricted the dataset to cross country, outdoor track, and road racing events with recorded temperature measurements. We selected running distances from the 100 meters all the way up to the half marathon. We did this to see if the relationship between weather conditions and performance differs across race lengths. This what our research question is getting at. Events without sufficient observations and events that were not individual running races were excluded. One road-race 8000-meter observation was also removed because it was the only race at that distance, which didn't provide enough data to calculate a standardized performance measure within its event and gender group. These decisions resulted in a weather-analysis dataset containing 77,088 observations across 12 sport/event combinations. 
 
 ### 3.2 Data Summary
 
