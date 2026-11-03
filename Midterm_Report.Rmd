@@ -138,6 +138,27 @@ only_run = only_run %>%
   mutate(weather_true = !is.na(temperature))
 ```
 
+### Gender Column Merge
+
+For gender, we have two separate columns, `gender` which only was filled about half of
+the entries, and `gender_1` which was full. First, compared the entries of the two columns
+to ensure that none of them were different. This first `all` returns TRUE which tells 
+us we do not have differences in rows where both columns are filled. Thus, we can 
+combine them into one `gender` column for future analysis. 
+
+```{r}
+all(only_run$gender[!is.na(only_run$gender) & !is.na(only_run$gender_1)] ==
+    only_run$gender_1[!is.na(only_run$gender) & is.na(only_run$gender_1)])
+
+only_run <- only_run %>%
+  mutate(gender = coalesce(gender, gender_1)) %>%
+  select(-gender_1)
+
+sum(is.na(only_run$gender))
+only_run %>%
+  count(gender)
+```
+
 #### Race Time Conversion and Performance Standardization
 
 Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes, seconds, or hours. To ensure consistency across events, we created a function to convert all finishing times into total seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
@@ -483,10 +504,10 @@ aware of as we dive into research questions.
 
 ```{r}
 only_run %>%
-  count(gender_1) %>% 
+  count(gender) %>% 
   mutate(percent = n / sum(n) * 100)
 
-ggplot(only_run, aes(x = gender_1)) + 
+ggplot(only_run, aes(x = gender)) + 
   geom_bar() + 
   labs(
     title = "Number of Race Results by Gender",
