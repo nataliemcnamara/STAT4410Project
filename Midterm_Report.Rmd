@@ -303,6 +303,9 @@ ggplot(event_summary, aes(x = count, y = reorder_within(event_name, count, sport
 ```
 
 
+### Location Altitude Elevation 
+tes test test
+
 ### 3.3 Research Question Exploration
 
 *insert content here*
