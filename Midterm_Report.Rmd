@@ -171,9 +171,8 @@ convert_time = function(x) {
 }
 
 only_run = only_run %>%
-  mutate(
-    time_seconds = convert_time(result_time)
-  )
+  mutate(time_seconds = convert_time(result_time))
+
 ```
 
 Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
@@ -198,7 +197,7 @@ only_run = only_run %>%
 
 The variable `event_type` could be very valuable for the stated goal of RQ3 in terms of the stakes of the race (prelims, finals, championship, etc.), but there are many missing values. Furthermore, when investigating unique event types, there are some typos and slight differences between names that cause the same event type to be essentially duplicated. To clean this variable, we first standardized existing names. Typos were addressed, and synonyms were combined into a single event type; "A" and "B" races were combined regardless of gender since a gender variable already exists to differentiate between them. 
 
-We were also able to fill in some missing values based on existing knowledge of the sport. For instance, all cross country races are one-time races (no prelims and finals), and it is reasonable to assume that the races not marked as a "regional" or "national" are simply regular season races. Thus, these entries were filled in as "Regular Season". Track entries with missing event types were left alone as it is much more difficult to simply guess those event types. Again, it is not in the best interest of our analysis to omit entries with missing values for this variable as they still contain valid, important information elsewhere.
+We were also able to fill in some missing values based on existing knowledge of the sport. For instance, all cross country races are one-time races (no prelims and finals), and it is reasonable to assume that the races not marked as a "regional" or "national" are simply regular season races. Thus, these entries were filled in as "Regular Season". Track entries with missing event types were left alone as it is much more difficult to simply guess those event types. Again, it is not in the best interest of our analysis to omit entries with missing values for this variable as they still contain valid, important information elsewhere. 28 unique event types remained after this step.
 
 ```{r}
 # Investigate messy event_type variable
@@ -230,18 +229,25 @@ length(unique(only_run$event_type))
   # count(event_type, sort = TRUE)
 ```
 
-For the variable `event_name`, there are a number of non-standard running events that have minimal numbers of entries. For instance, 7000m is a non-standard cross country distance with only two recorded entries in the dataset. It was determined after reviewing a summary of counts by event and sport name that events with 100 or less observations tended to be niche events. For cleanest data and to compare performances across standardized times, we filtered out these non-standard, low-frequency niche race events (defined as event classifications with fewer than 200 total observations dataset-wide). Removing these single-instance anomalies will prevent any skewed performance metrics without meaningfully altering the overall dataset size.
+For the variable `event_name`, there are a number of non-standard running events that have minimal numbers of entries. For instance, 7000m is a non-standard cross country distance with only two recorded entries in the dataset. It was determined after reviewing a summary of counts by event and sport name that events with 200 or less observations tended to be niche events. For cleanest data and to compare performances across standardized times, we filtered out these non-standard, low-frequency niche race events (defined as event classifications with fewer than 200 total observations dataset-wide). Removing these single-instance anomalies will prevent any skewed performance metrics without meaningfully altering the overall dataset size.
 
-Prior to filtering, the dataset contained 37 unique race events. After removing non-standard and niche events with fewer than 100 total entries, 24 unique event types remain, with only a reduction in observations by just over 1000 entries.
+Prior to filtering, the dataset contained 37 unique race events. After removing non-standard and niche events with fewer than 200 total entries, 20 unique events remain, with only a reduction in observations by just over 1000 entries.
 
 ```{r}
 # Investigate niche events
 event_summary = only_run %>%
   count(sport_name, event_name, name = "count") %>%
-  filter(count < 200) %>%
+  filter(count < 300) %>%
   arrange(count)
 
-event_summary
+# Filter out low-entry events
+only_run = only_run %>%
+  group_by(event_name) %>%
+  filter(n() >= 200) %>%
+  ungroup()
+
+length(unique(only_run$event_name))
+dim(only_run)
 ```
 
 
@@ -285,7 +291,7 @@ ggplot(stakes_summary_class, aes(x = reorder(stake_category, percentage), y = pe
   )
 ```
 
-With the "Sports and Events" variables, `sport_name` shows four unique running sports represented in the dataset: Outdoor Track, Indoor Track, Cross Country, and Road Race. Each of these sports are assigned a number from 1-4 according to the `sport_id` variable. From these sports, each contain a collection of events that can be run in said sport given by the `event_name` variable. There are 37 unique event types, each also associated with a number in the `event_id` variable.
+With the "Sports and Events" variables, `sport_name` shows four unique running sports represented in the dataset: Outdoor Track, Indoor Track, Cross Country, and Road Race. Each of these sports are assigned a number from 1-4 according to the `sport_id` variable. From these sports, each contain a collection of events that can be run in said sport given by the `event_name` variable. There are 20 unique events, each also associated with a number in the `event_id` variable.
 
 ```{r}
 event_summary = only_run %>%
