@@ -3,8 +3,6 @@ title: "The Role of Race Context in Collegiate Running Performance"
 author: "Seamus Bygrave, Renee Kafka, and Natalie McNamara"
 date: "11-04-2026"
 output: pdf_document
-header-includes:
-  - \captionsetup[table]{position=bottom}
 ---
 
 ```{r setup, include=FALSE}
@@ -25,7 +23,7 @@ The tracking of statistics related to running performance is relatively new; whe
 
   There exist some papers written within the past few years years that examine influencing factors on race-day performance, mainly focused on weather parameters. Many of these papers focus on the marathon distance; for instance, Knechtle et. al (2019) specifically looked at years of Boston Marathon results to determine the relationship between weather conditions, sex, country of origin, and running performance. Another paper by Mantzios et al. (2022) looked into the implications of temperature, humidity, and wind speed on performance in endurance running events across the globe, finding that heat has a particularly strong impact on reducing peak running abilities. While these papers determine some conditions that considerably impact running performance, they are mostly limited to very long distances (10K, marathons, etc.) and tend to focus mostly on weather variables only. Furthermore, these athletes tend to be professional runners and older. It should be noted that marathon athletes and races make up only a fraction of the sport.
 
-  Researchers at Notre Dame, the founders of the dataset we seek to work with, wrote one of the first papers to use a publicly available running dataset that expands scope beyond the marathon. Their paper looks to provide an evidence-based framework on ideal race scheduling at the collegiate level based on athlete improvement trends throughout racing season (Karr, Fryer, et al., 2026). However, their research questions center around the athletes themselves, focusing on their improvement within a season and across multiple seasons. With our project, we hope to specifically examine the outside factors available in this dataset that contribute to the race environment and ultimately influence athlete performance, from weather and topography to race stakes. Our research will fill in some gaps identified earlier, including looking at a wider range of race types and focusing attention on a range of collegiate athletes rather than only professional runners and road racers. In this way, our findings become more relevant to a wider group of runners; it can provide valuable information on which "uncontrollable" factors impact race day the most so athletes can be best prepared to handle them.
+  Researchers at Notre Dame, the founders of the dataset we seek to work with, wrote one of the first papers to use a publicly available running dataset that expands scope beyond the marathon. Their paper looks to provide an evidence-based framework on ideal race scheduling at the collegiate level based on athlete improvement trends throughout racing season (Karr, Fryer, et al., 2026). However, their research questions center around the athletes themselves, focusing on their improvement within a season and across multiple seasons. With our project, we hope to specifically examine the outside factors available in this dataset that contribute to the race environment and ultimately influence athlete performance, from weather and topography to race stakes. Our research will fill in some gaps identified earlier, including looking at a wider range of race types and focusing attention on a range of collegiate athletes rather than only professional runners and road racers. Furthermore, we will include track events into our study, which has not been a focus of previous reports. In this way, our findings become more relevant to a wider group of runners; it can provide valuable information on which "uncontrollable" factors impact race day the most so athletes can be best prepared to handle them.
     
 ### 1.3 Research Questions 
   
@@ -55,7 +53,7 @@ This dataset is useful to answer our research questions because it provides us w
 
 ### 3.1 Data Cleaning
 
-The initial dataset contained results from the main collegiate running sports of cross country and track, Because this study focuses specifically on individual running performance, the initial phase of our data cleaning process centered around excluding entries for non-running track events and relay results from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were used to distinguish eligible running events from other athletic competitions. Furthermore, the last 11 columns were excluded from our analysis since they do not pertain to our stated goals. This leaves 59 available variables and around 165000 observations.
+The initial dataset contained results from the main collegiate running sports of cross country and track. The stated goal of this study is to look into performance data surrounding the sports of cross country and track; therefore, initial phase of our data cleaning process centered around excluding entries for non-running track events, relay results, and road races from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were used to distinguish eligible running events from other athletic competitions. Furthermore, the last 11 columns were excluded from our analysis since they do not pertain to our stated goals. This leaves 59 available variables and around 160000 observations.
 
 ```{r}
 run = read.csv('joined.csv')
@@ -69,9 +67,9 @@ library(knitr)
 library(ggplot2)
 library(tidytext)
 
-# First, exclude all non-running events and relay races
+# First, exclude all non-running events, relay races, and road races
 
-trues = str_detect(run$event_name, '(\\d{2,5}m)|(Marathon)|(Mile)') &
+trues = str_detect(run$event_name, '(\\d{2,5}m)|(Mile)') &
         !str_detect(run$event_name, 'x')
 
 only_run = run[trues, ]
@@ -83,7 +81,9 @@ dim(only_run)
 # Next, grab only columns that could pertain to research questions
 # Exclude relay columns, racewalk columns
 
-only_run = only_run %>% select(1:59)
+only_run = only_run %>% 
+  select(1:59) %>%
+  filter(sport_name != "Road Race")
 dim(only_run)
 ```
 
@@ -93,16 +93,14 @@ This dataset includes over 21000 rows where the result_ids are duplicated. As a 
 
 To prove this finding, we utilized a pipeline that filtered to duplicate result ID's; summarizing on the ID variables `athlete_id` and `meet_id` helped determine if each duplicated result id had a one-to-one relationship with the athlete and meet. We also used `result_time` to solidify whether these rows contained the same exact result, since the times more strongly identify a unique performance down to the second. Finally, using `count` returned a one-row result indicating that all duplicated result ID's correspond with one unique athlete and result. Thus, we concluded there is a high likelihood these are redundant. We made the decision to accept the first recorded entry for each duplicated result ID, since weather parameters are unlikely to change dramatically in the relatively small amount of race time.
 
-After filtering out duplicate entries, we are left with ~130000 observations.
+After filtering out all duplicate entries, we are left with ~128000 observations.
 
 ```{r}
 # Filter out exact duplicate entries
 
 only_run = only_run %>% distinct()
 dim(only_run)
-```
 
-```{r}
 # Are remaining duplicate result_ids nearly the same?
 
 dp = only_run %>%
@@ -197,7 +195,7 @@ only_run = only_run %>%
 
 The variable `event_type` could be very valuable for the stated goal of RQ3 in terms of the stakes of the race (prelims, finals, championship, etc.), but there are many missing values. Furthermore, when investigating unique event types, there are some typos and slight differences between names that cause the same event type to be essentially duplicated. To clean this variable, we first standardized existing names. Typos were addressed, and synonyms were combined into a single event type; "A" and "B" races were combined regardless of gender since a gender variable already exists to differentiate between them. 
 
-We were also able to fill in some missing values based on existing knowledge of the sport. For instance, all cross country races are one-time races (no prelims and finals), and it is reasonable to assume that the races not marked as a "regional" or "national" are simply regular season races. Thus, these entries were filled in as "Regular Season". Track entries with missing event types were left alone as it is much more difficult to simply guess those event types. Again, it is not in the best interest of our analysis to omit entries with missing values for this variable as they still contain valid, important information elsewhere. 28 unique event types remained after this step.
+We were also able to fill in some missing values based on existing knowledge of the sport. For instance, all cross country races are one-time races (no prelims and finals), and it is reasonable to assume that the races not marked as a "regional" or "national" are simply regular season races. Thus, these entries were filled in as "Regular Season". Track entries with missing event types were left alone as it is much more difficult to simply guess those event types. Again, it is not in the best interest of our analysis to omit entries with missing values for this variable as they still contain valid, important information elsewhere. 27 unique event types remained after this step.
 
 ```{r}
 # Investigate messy event_type variable
@@ -229,26 +227,45 @@ length(unique(only_run$event_type))
   # count(event_type, sort = TRUE)
 ```
 
-For the variable `event_name`, there are a number of non-standard running events that have minimal numbers of entries. For instance, 7000m is a non-standard cross country distance with only two recorded entries in the dataset. It was determined after reviewing a summary of counts by event and sport name that events with 200 or less observations tended to be niche events. For cleanest data and to compare performances across standardized times, we filtered out these non-standard, low-frequency niche race events (defined as event classifications with fewer than 200 total observations dataset-wide). Removing these single-instance anomalies will prevent any skewed performance metrics without meaningfully altering the overall dataset size.
+For the variable `event_name`, there are a number of non-standard running events that have minimal numbers of entries. For instance, 7000m is a non-standard cross country distance with only two recorded entries in the dataset. It was defined, based our existing knowledge of the running sports in this dataset, that a "niche" event was one with 200 or less observations. For cleanest data and to compare performances across standardized times, we filtered these out.
 
-Prior to filtering, the dataset contained 37 unique race events. After removing non-standard and niche events with fewer than 200 total entries, 20 unique events remain, with only a reduction in observations by just over 1000 entries.
+Prior to filtering, the dataset contained 33 unique race events. After removing non-standard and niche events with fewer than 200 total entries, 19 unique events remain with a relatively small amount of data loss (~1000 entries).
 
 ```{r}
 # Investigate niche events
 event_summary = only_run %>%
   count(sport_name, event_name, name = "count") %>%
-  filter(count < 300) %>%
+  filter(count < 200) %>%
   arrange(count)
 
+event_summary
+```
+```{r}
 # Filter out low-entry events
 only_run = only_run %>%
+  mutate(event_name = as.character(event_name)) %>% 
   group_by(event_name) %>%
-  filter(n() >= 200) %>%
+  filter(n() >= 200) %>%  
   ungroup()
 
 length(unique(only_run$event_name))
 dim(only_run)
 ```
+
+After creating the column `time_seconds` as a conversion of `result_time`, it was realized that some result times may have been entered incorrectly due to being extremely low for the event. The sport and event areas where these occurred were examined, and 29 seemingly incorrect entries were cleaned out based on world record times.
+
+```{r}
+only_run = only_run %>%
+  filter(
+    !(sport_name == "Cross Country" & event_name == "8000m" &
+        gender_1 == "M" & time_seconds < 1320),
+    !(sport_name == "Cross Country" & event_name == "6000m" &
+        gender_1 == "F" & time_seconds < 1080)
+  )
+
+dim(only_run)
+```
+
 
 #### Selection of Running Events
 
@@ -267,7 +284,7 @@ stakes_summary = only_run %>%
 
 kable(
   stakes_summary,
-  caption = "Table _: Number of Entries in Each Race Stakes Classification"
+  caption = "Table _: Number of Results in Each Race Stakes Classification"
 )
 ```
 
@@ -294,21 +311,84 @@ ggplot(stakes_summary_class, aes(x = reorder(stake_category, percentage), y = pe
   )
 ```
 
-With the "Sports and Events" variables, `sport_name` shows four unique running sports represented in the dataset: Outdoor Track, Indoor Track, Cross Country, and Road Race. Each of these sports are assigned a number from 1-4 according to the `sport_id` variable. From these sports, each contain a collection of events that can be run in said sport given by the `event_name` variable. There are 20 unique events, each also associated with a number in the `event_id` variable.
+For the "Sports and Events" variables, `sport_name` shows four unique running sports represented in the dataset: Outdoor Track, Indoor Track, Cross Country, and Road Race. Each of these sports are assigned a number from 1-4 according to the `sport_id` variable. From these sports, each contain a collection of events that can be run in said sport given by the `event_name` variable. There are _ unique events, each also associated with a number in the `event_id` variable. Some of these events can be ran in the different sports: for instance, the 800m can be ran both inside and outside on a track. 
+Each sport has a unique number of events - cross country and road races have much less variety in race distances compared to track. Due to this and the large number of events particularly in track, vectors of the most common events for each sport were defined for upcoming summaries. The criteria for "most common" was defined as follows: events in cross country, indoor track, or outdoor had to have at least 1000 observations, while events in road races had to have at least 250 observations. These suitably encompassed the major race distances in each sport to provide the strongest summary.Figure _ below shows this exact distribution of most common events by running sport.
+
+```{r}
+xc_events = c("8000m", "6000m", "5000m")
+
+indoor_events = c("60m","60m Hurdles", "200m", "400m", "800m", "Mile", "3000m")
+
+outdoor_events = c("100m", "200m", "400m", "800m", "1500m", "1600m", "5000m")
+```
 
 ```{r}
 event_summary = only_run %>%
-  count(sport_name, event_name, name = "count")
+  count(sport_name, event_name, name = "count") %>%
+  filter(
+    (sport_name == "Cross Country" & event_name %in% xc_events) |
+    (sport_name == "Indoor Track" & event_name %in% indoor_events) |
+    (sport_name == "Outdoor Track" & event_name %in% outdoor_events)
+  )
 
 ggplot(event_summary, aes(x = count, y = reorder_within(event_name, count, sport_name))) +
   geom_col() +
   scale_y_reordered() +
-  facet_wrap(~sport_name, scales = "free", ncol = 2) + 
+  facet_wrap(~sport_name, scales = "free", nrow = 2, ncol = 2) + 
   labs(
-    title = "Distribution of Running Events by Sport",
+    title = "Figure _: Distribution of Most Common Running Events by Sport",
     x = "Number of Results",
     y = "Running Event"
   )
+```
+
+Crucial to our analysis are the time performances of the athletes. The variable `result_time` gives us these times, and they were converted into the lowest unit `time_seconds` for ease of comparison during the cleaning process. Result times are most directly associated with the event being ran and gender. Due to the differences in variety of events per sport, custom summaries per sport are given below.
+
+Figure _ displays distribution of cross country times across the 8000m, 6000m, and 5000m distances. Men typically only run the 8000m, while both men and women run the 6000m and 5000m distances.
+
+```{r}
+xc = only_run %>%
+  filter(sport_name == "Cross Country", event_name %in% xc_events) %>%
+  mutate(time_minutes = time_seconds / 60)
+  
+
+ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender_1)) +
+  geom_violin() +
+  labs(
+    title = "Figure _: Time Distributions by Cross Country Event",
+    x = "Result Time (Minutes)",
+    y = NULL
+  )
+
+```
+
+The track events are much more numerous, so average and median times for the most common events are provided in Tables _ and _ below.
+```{r}
+indoor_summary = only_run %>%
+  filter(sport_name == "Indoor Track",
+         event_name %in% indoor_events) %>%
+  group_by(event_name, gender_1) %>%
+  summarise(
+    mean_time = round(mean(time_seconds), 2),
+    median_time = round(median(time_seconds), 2),
+  ) %>%
+  arrange(mean_time)
+
+kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table _: Average and Median Times for Indoor Track Events")
+```
+
+```{r}
+outdoor_summary = only_run %>%
+  filter(sport_name == "Outdoor Track",
+         event_name %in% outdoor_events) %>%
+  group_by(event_name, gender_1) %>%
+  summarise(
+    mean_time = round(mean(time_seconds), 2),
+    median_time = round(median(time_seconds), 2),
+  ) %>%
+  arrange(mean_time)
+
+kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table _: Average and Median Times for Outdoor Track Events")
 ```
 
 For the "Altitude and Elevation" variables, we have `altitude`, `elevation_gain`, and 
