@@ -134,7 +134,7 @@ only_run = only_run %>%
   mutate(weather_true = !is.na(temperature))
 ```
 
-There is a general set of weather variables always present together, including ones like `temperature`, `dew_point`, and `humidity`. Some niche weather variables simply don't have enough data to justify including them in analysis. **Renee please finish this part, try to justify why you might not use particular columns by showing like percent missing or whatever works. And then any other weather variables you want to clean.** 
+There is a general set of weather variables always present together, including ones like `temperature`, `dew_point`, and `humidity`. Some niche weather variables simply don't have enough data to justify including them in analysis. To determine which weather variables would be most useful for our analysis, we examined the percentage of missing observations across the weather-related columns in the original dataset. Temperature, humidity, and wind speed each had approximately 54.3% missing observations, while precipitation measurements were missing for approximately 96.7% of observations. Because precipitation data were available for such a small proportion of results, we excluded precipitation from our primary weather analysis. Instead, we prioritized temperature, humidity, and wind speed, which provide substantially more complete information about race conditions. Although these variables still contain considerable missing data in the original dataset, much of this missingness is associated with races without recorded weather information, including indoor track events. Rather than removing these observations from the shared dataset, we retained them for analyses that do not require weather information. For our weather-specific analysis, we will create a subset containing eligible outdoor running events with recorded weather measurements. This approach allows us to investigate weather-related performance patterns without unnecessarily restricting the observations available for the group's other research questions. 
 
 #### Miscellaneous Variable Cleanup
 
@@ -171,6 +171,40 @@ only_run %>%
   count(event_type, sort = TRUE)
 ```
 
+#### Race Time Conversion and Performance Standardization
+
+Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes, seconds, or hours. To ensure consistency across events, we created a function to convert all finishing times into total seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
+```{r}
+convert_time <- function(x) {
+  sapply(x, function(t) {
+    if (is.na(t) || trimws(t) == "") {
+      return(NA_real_)
+    }
+
+    parts <- strsplit(trimws(t), ":")[[1]]
+    nums <- suppressWarnings(as.numeric(parts))
+
+    if (any(is.na(nums))) {
+      return(NA_real_)
+    }
+
+    if (length(nums) == 1) {
+      return(nums[1])
+    } else if (length(nums) == 2) {
+      return(nums[1] * 60 + nums[2])
+    } else if (length(nums) == 3) {
+      return(nums[1] * 3600 + nums[2] * 60 + nums[3])
+    } else {
+      return(NA_real_)
+    }
+  })
+}
+
+only_run <- only_run %>%
+  mutate(
+    time_seconds = convert_time(result_time)
+  )
+```
 
 ### 3.2 Data Summary
 
