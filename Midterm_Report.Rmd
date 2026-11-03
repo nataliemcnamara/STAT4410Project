@@ -140,7 +140,77 @@ only_run = only_run %>%
   mutate(weather_true = !is.na(temperature))
 ```
 
-There is a general set of weather variables always present together, including ones like `temperature`, `dew_point`, and `humidity`. Some niche weather variables simply don't have enough data to justify including them in analysis. **Renee please finish this part, try to justify why you might not use particular columns by showing like percent missing or whatever works. And then any other weather variables you want to clean.** 
+#### Race Time Conversion and Performance Standardization
+
+Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes, seconds, or hours. To ensure consistency across events, we created a function to convert all finishing times into total seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
+
+```{r}
+convert_time <- function(x) {
+  sapply(x, function(t) {
+    if (is.na(t) || trimws(t) == "") {
+      return(NA_real_)
+    }
+
+    parts <- strsplit(trimws(t), ":")[[1]]
+    nums <- suppressWarnings(as.numeric(parts))
+
+    if (any(is.na(nums))) {
+      return(NA_real_)
+    }
+
+    if (length(nums) == 1) {
+      return(nums[1])
+    } else if (length(nums) == 2) {
+      return(nums[1] * 60 + nums[2])
+    } else if (length(nums) == 3) {
+      return(nums[1] * 3600 + nums[2] * 60 + nums[3])
+    } else {
+      return(NA_real_)
+    }
+  })
+}
+
+only_run <- only_run %>%
+  mutate(
+    time_seconds = convert_time(result_time)
+  )
+```
+
+Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
+
+```{r}
+only_run <- only_run %>%
+  group_by(sport_name, event_name, gender) %>%
+  mutate(
+    standardized_time = if (
+      sum(!is.na(time_seconds)) > 1 &&
+      sd(time_seconds, na.rm = TRUE) > 0
+    ) {
+      as.numeric(scale(time_seconds))
+    } else {
+      NA_real_
+    }
+  ) %>%
+  ungroup()
+```
+
+Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
+
+```{r}
+only_run <- only_run %>%
+  group_by(sport_name, event_name, gender) %>%
+  mutate(
+    standardized_time = if (
+      sum(!is.na(time_seconds)) > 1 &&
+      sd(time_seconds, na.rm = TRUE) > 0
+    ) {
+      as.numeric(scale(time_seconds))
+    } else {
+      NA_real_
+    }
+  ) %>%
+  ungroup()
+``` 
 
 #### Miscellaneous Variable Cleanup
 
