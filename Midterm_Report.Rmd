@@ -156,6 +156,22 @@ only_run %>%
   count(gender)
 ```
 
+### Date Column Merge
+
+For dates, we need to combine all of the date columns into one. We found that the variables `start_date` and `end_date` were both full of data values, and `date_of_event` missing many values. In finding the difference in days of the start date and end date, we find that there are only 10 dates with a two-day difference in start to end. Thus, we determined to make one full `date` variable that has all of the start dates in them, since the difference in days is not going to effect the racers times.
+
+```{r}
+diff_days <- abs(as.numeric(only_run$start_date - only_run$end_date)) / (60 * 60 * 24)
+summary(diff_days)
+
+sum(diff_days > 1, na.rm = TRUE)
+sum(diff_days > 2, na.rm = TRUE)
+
+only_run <- only_run %>%
+  mutate(date = start_of_date) %>%
+  select(-start_date, -end_date, -date_of_event)
+```
+
 #### Race Time Conversion and Performance Standardization
 
 Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes or hours. To ensure consistency across events, we added a column converting result times into seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
