@@ -294,6 +294,8 @@ After looking at the weather-data availability, we restricted the dataset to cro
 
 ### 3.2 Data Summary
 
+The numerous variables in the NRCD dataset can be grouped based on shared characteristics and for ease of exploring research questions later. Groupings include race stakes, sports/events, results, altitude/elevation, weather, location, team, and gender.
+
 "Race Stakes" variables, are variables that define the context of a meet. This could be classifying the race as club-only (`nirca_only`), regionals (`regionals`), or nationals (`nationals`), which are typically end-of-season championship meets. Furthermore, the variable `event_type` breaks it down with even further context, especially for track events when there may be preliminary and final rounds. The variables `nirca_only`, `regionals`, and `nationals` are each logical/Boolean vectors denoting the race classification.
 
 Table _ below displays the counts of entries under each classification and the total percent that each make up in the larger dataset. This table is designed to show the overlap that occurs between classifications - for instance, all regional and national meets are also classified as NIRCA (club) running meets only. There are some NIRCA-only regular season meets as well as meets that fall outside the NIRCA designation (could be NCAA, road races, etc.)
@@ -549,12 +551,27 @@ only_run %>%
 
 ### 3.3 Research Question Exploration
 
+#### RQ1 Renee
 *insert content here*
+
+#### RQ2 Seamus
+*insert content here*
+
+### RQ3 Natalie
+*insert content here*
+
+
 
 ### 3.4 Qualitative Analysis
 
+#### RQ1 Renee
 *insert content here*
 
+#### RQ2 Seamus
+*insert content here*
+
+### RQ3 Natalie
+*insert content here*
 
 \newpage
 
