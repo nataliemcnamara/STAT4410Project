@@ -878,7 +878,67 @@ Further investigation revealed that several unusual spikes in our weather-perfor
 Other intervals also showed substantial concentration within individual meets. For example, the short-distance wind-speed interval of 2–4 contained 33 results from one meet, while 95.2% of the 580 long-distance results in the 20–22 wind-speed interval came from a single competition. In contrast, the long-distance humidity interval of 95–100% included 585 results across 10 meets, with no individual meet contributing more than 26.2% of observations. These findings demonstrate that the number of race results alone does not necessarily indicate how broadly a pattern is represented across competitions. Because athletes competing at the same meet may share weather conditions and other race characteristics, apparent relationships should be interpreted cautiously, particularly when observations are concentrated within a small number of meets.
 
 #### RQ2 Seamus
-*insert content here*
+
+As we explore the different effects of certain contexts on race, some of the most important are the location and altitude of the race itself. Depending on where certain races are held around the country, runners are likely to find individual differences among them, specifically related to altitude and sometimes elevation. Either way, we want to determine how much altitude and race location themselves are effecting the runner's performances. We determined it'd be best to split altitudes into four categories: Low, Moderate, High, and Very High, in order to more easily visualize the altitude data.
+
+```{r}
+only_run %>%
+  mutate(
+    altitude_category = case_when(
+      altitude < 1000 ~ "Low",
+      altitude < 3000 ~ "Moderate",
+      altitude < 5000 ~ "High",
+      altitude >= 5000 ~ "Very High",
+      TRUE ~ NA_character_
+    )
+    
+  ) %>%
+  filter(!is.na(altitude_category), !is.na(standardized_time)) %>% 
+  ggplot(aes(x = altitude_category, y = standardized_time)) + 
+  geom_boxplot() + 
+  labs( 
+    title = "Athelete Performance Across Race Altitude", 
+    x = "Race Altitude Category", 
+    y = "Standardized Time" 
+  ) +
+  theme_minimal()
+```
+
+We can see based off this box plot that the median indicates that moderate level of altitudes find an average standardization score of 0, which is about an average score in this set of race times. For both High and Low altitudes, we can see that the median hovers around -0.1 or -0.2 for both, indicating that runners tend to score slightly above average in those altitudes. For Very High altitudes, we see a median of about -0.5, which is significantly above the average score. Therefore, we can conclude that altitude of the, for the most part, is not super significant for race times aside from those with Very High altitudes.
+
+We also can look at elevation gain and elevation loss. We don't have nearly as much data on this as altitude, but still is good to understand how, if at all, the elevation gain and elevation loss is effecting the runner's performances.
+
+```{r}
+ggplot(
+  only_run %>%
+    filter(!is.na(elevation_gain), !is.na(standardized_time)),
+  aes(x = elevation_gain, y = standardized_time)
+) + 
+  geom_point(alpha = 0.05) +
+  geom_smooth(method = "lm", color = "yellow") +
+  labs(
+    title = "Standardized Race Performance vs. Elevation Gain",
+    x = "Race Elevation Gain",
+    y = "Standardized Time"
+  ) +
+  theme_minimal()
+
+ggplot(
+  only_run %>%
+    filter(!is.na(elevation_loss), !is.na(standardized_time)),
+  aes(x = elevation_loss, y = standardized_time)
+) + 
+  geom_point(alpha = 0.15, color = "blue") +
+  geom_smooth(method = "lm", color = "orange") +
+  labs(
+    title = "Standardized Race Performance vs. Elevation Loss",
+    x = "Race Elevation Loss",
+    y = "Standardized Time"
+  ) +
+  theme_minimal()
+```
+
+We can clearly see in these scatter plots that elevation gain and loss, respectively, have a positive, yet very weak correlation. We can conclude that the two variables attached with standardized scores have some tendency to increase together, but the relationship is not very reliable due to it being very weak in nature. The results from this graph, as well as the lack of amount of elevation gain and loss data in the data set, may likely reasonably lead us to take out elevation from the analysis for runner performance.
 
 ### RQ3 Natalie
 
