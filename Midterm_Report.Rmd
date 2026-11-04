@@ -421,12 +421,12 @@ kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "M
 outdoor_summary = only_run %>%
   filter(sport_name == "Outdoor Track",
          event_name %in% outdoor_events) %>%
-  group_by(event_name, gender) %>%
-  summarise(
-    mean_time = round(mean(time_seconds), 2),
-    median_time = round(median(time_seconds), 2),
+  group_by(event_name, gender) %>% 
+  summarise( 
+    mean_time = round(mean(time_seconds), 2), 
+    median_time = round(median(time_seconds), 2), 
   ) %>%
-  arrange(mean_time)
+  arrange(mean_time) 
 
 kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table _: Average and Median Times for Outdoor Track Events")
 ```
