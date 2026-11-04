@@ -920,22 +920,22 @@ ggplot(outdoor_monthly, aes(x = month, y = mean_time, color = gender, group = ge
   )
 ```
 
+The next step in exploring potential effects of race stakes is looking at performances across the different race classifications. Figure _ maps out the distributions of performances across the two major events in cross country according to the race classifications of "Regular", "Regionals", and "Nationals". All of these classifications fall under the NIRCA umbrella - that is, all of the represented performances came from club-only meets.
+
 ```{r}
-only_run = only_run %>%
+xc_stakes = only_run %>%
   mutate(
     stake_category = case_when(
       !regionals & !nationals & !nirca_only ~ "Open / Non-NIRCA Meets",
       !regionals & !nationals & nirca_only  ~ "Regular",
       !regionals & nationals & nirca_only   ~ "Nationals",
       regionals & !nationals & nirca_only   ~ "Regionals"
-    )
-  )
-
-xc_stakes = only_run %>%
+    )) %>%
   filter(
     sport_name == "Cross Country",
     event_name %in% xc_events & event_name != '5000m',
-    stake_category != "Open / Non-NIRCA Meets"
+    stake_category != "Open / Non-NIRCA Meets",
+    !(event_name == "6000m" & gender == "M")
     ) %>%
   mutate(stake_category = factor(
     stake_category,
@@ -944,14 +944,78 @@ xc_stakes = only_run %>%
 
 ggplot(xc_stakes, aes(x = stake_category, y = time_seconds / 60)) +
   geom_boxplot() +
-  facet_wrap(~event_name, scales = "free_y") +
+  facet_wrap(
+    ~event_name,
+    scales = "free_y",
+    labeller = as_labeller(c("6000m" = "6000m Women", "8000m" = "8000m Men"))) +
   labs(
     title = "Figure _: Cross Country Performance by Race Stakes",
     x = "Race Stakes",
-    y = "Race Time (Minutes)"
+    y = "Race Time (Minutes)",
   )
 ```
 
+A similar visualization was developed in Figure _ for track; due to the volume of events, certain events from across the spectrum of distances were chosen to best represent the range of distances in the sport. This includes a short sprint (100m), a long sprint (400m), and a middle distance (1500m). Furthermore, the "regionals" classification does not exist for track, so only performances in regular season vs. championship meets could be compared here.
+
+```{r}
+sprint_stakes = only_run %>%
+  mutate(
+    stake_category = case_when(
+      !regionals & !nationals & !nirca_only ~ "Open / Non-NIRCA Meets",
+      !regionals & !nationals & nirca_only  ~ "Regular",
+      !regionals & nationals & nirca_only   ~ "Nationals",
+      regionals & !nationals & nirca_only   ~ "Regionals",
+    )) %>%
+  mutate(event_name = factor(event_name, levels = c("100m", "400m", "1500m"))) %>%
+  filter(
+    sport_name == "Outdoor Track",
+    event_name %in% c('100m', "400m", "1500m"),
+    stake_category != ("Open / Non-NIRCA Meets"),
+    ) %>%
+  mutate(stake_category = factor(
+    stake_category,
+    levels = c("Regular", "Nationals"))
+    )
+
+ggplot(sprint_stakes, aes(x = stake_category, y = time_seconds)) +
+  geom_boxplot() +
+  facet_wrap(
+    ~event_name,
+    scales = "free_y",
+    ) +
+  labs(
+    title = "Figure _: Track Performance by Race Stakes",
+    x = "Race Stakes",
+    y = "Race Time (Seconds)",
+  )
+```
+
+In exploring race stakes, it is also necessary to compare performance distributions between NIRCA and non-NIRCA races. NIRCA races include club-only amateur collegiate athletes, while non-NIRCA races can be hosted by other governing bodies such as the NCAA. This means that, in non-NIRCA races, amateur athletes may be competing against high-level NCAA athletes. Among the two major races in the sport of cross country, performance distributions are compared between NIRCA and non-NIRCA races in Figure _.
+
+```{r}
+xc_nirca = only_run %>%
+  mutate(
+    competition_type = case_when(
+      !regionals & !nationals & !nirca_only ~ "Non-NIRCA",
+      !regionals & !nationals & nirca_only ~ "NIRCA"
+    )
+  ) %>%
+  filter(
+    sport_name == "Cross Country",
+    event_name %in% c("6000m", "8000m"),
+    !is.na(competition_type),
+    !(event_name == "6000m" & gender == "M")
+  )
+
+ggplot(xc_nirca, aes(x = competition_type, y = time_seconds / 60)) +
+  geom_boxplot() +
+  facet_wrap(~event_name, scales = "free_y", labeller = as_labeller(c("6000m" = "6000m Women", "8000m" = "8000m Men"))) +
+  labs(
+    title = "Figure _: Cross Country Performance at NIRCA vs. Non-NIRCA Meets",
+    x = "Competition Type",
+    y = "Race Time (Minutes)"
+  )
+```
 
 
 
@@ -968,7 +1032,16 @@ Overall, our findings provide preliminary evidence that weather conditions may b
 *insert content here*
 
 ### RQ3 Natalie
-*insert content here*
+
+It is crucial to understand both the circumstances surrounding race day as well as the characteristics inherent to a race. These characteristics include the type and classification of a race, which can have differing physical and mental impacts on athletes depending on the sport and event. The time in the season of which a race occurs will also inherently have an impact - races gain increased importance as the season wears on, and theoretically, athletes will strive to improve as a result. In the data visualizations for our third research question, we sought to identify trends that may indicate correlations between race stakes and athlete performance. Specifically, one might hypothesize that the greater the stakes, the faster the times.
+
+Figures "", "", and "" display performance progressions across the seasons of each running sport represented in the data set. Across the months of cross country, there are clear declines in times as the season wears on with only a couple of exceptions. This would establish a correlation between improved performance and late-season races, though it should be stressed that time of season is just one of many considerations when determining why athletes perform the way they do. The same cannot be said of indoor track, where average result times experience an upward trend as the season wears on. Exceptions to this include the longer-distance events. This potentially indicates that it is harder to improve in the short distances even as the season progresses, perhaps simply due to the smaller distance and thus smaller margin for improvement. However, the long distance race performances experience a flat-to-downward trend, reflecting an increased margin for improvement. This is an intriguing finding in the long distances, as athletes tend to experience more burnout in these events as the season wears on. However, it seems that the increased margin for improvement wins out.
+
+Outdoor track events show declines in times across the board – this indicates that athletes generally continue to improve as the outdoor season progresses, regardless of race distance. This trend may reflect both the cumulative effects of training throughout the academic year as well as the gradual increase in meet importance. The smaller, more controlled environment of an indoor track race may also explain the relative lack of improvement in indoor track. These patterns suggest that the relationship between time of season and athletic performance varies between running sports and even between events within the same sport. While late-season races generally appear to produce faster results in cross country and outdoor track, indoor track demonstrates a more complicated relationship, particularly among shorter-distance events.
+
+When comparing performances across race classifications in both Figures "" and "", there are visible declines in the average times and distribution centers from regular season races to national races. There is a clear correlation between faster times and heightened race stakes - championship performances not only tend to have faster times, but the distributions are more compact with less outliers, indicating the athletes are attempting to run their best at some of the most important meets of the year.
+
+One final interesting finding comes when comparing performance distributions between NIRCA and non-NIRCA races. Non-NIRCA races have lower average times and much more compact distributions compared to NIRCA races.
 
 \newpage
 
