@@ -66,6 +66,7 @@ library(stringr)
 library(knitr)
 library(ggplot2)
 library(tidytext)
+library(lubridate)
 
 # First, exclude all non-running events, relay races, and road races
 
@@ -140,18 +141,14 @@ only_run = only_run %>%
 
 ### Gender Column Merge
 
-For gender, we have two separate columns, `gender` which only was filled about half of
-the entries, and `gender_1` which was full. First, compared the entries of the two columns
-to ensure that none of them were different. This first `all` returns TRUE which tells 
-us we do not have differences in rows where both columns are filled. Thus, we can 
-combine them into one `gender` column for future analysis. 
+For gender, we have two separate columns, `gender` which only was filled about half of the entries, and `gender_1` which was full. First, compared the entries of the two columns to ensure that none of them were different. This first `all` returns TRUE which tells us we do not have differences in rows where both columns are filled. Thus, we can combine them into one `gender` column for future analysis. 
 
 ```{r}
-all(only_run$gender[!is.na(only_run$gender) & !is.na(only_run$gender_1)] ==
+all(only_run$gender[!is.na(only_run$gender) & is.na(only_run$gender_1)] ==
     only_run$gender_1[!is.na(only_run$gender) & is.na(only_run$gender_1)])
 
-only_run <- only_run %>%
-  mutate(gender = coalesce(gender, gender_1)) %>%
+only_run = only_run %>%
+  mutate(gender = gender_1) %>%
   select(-gender_1)
 
 sum(is.na(only_run$gender))
@@ -161,37 +158,21 @@ only_run %>%
 
 #### Race Time Conversion and Performance Standardization
 
-Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes, seconds, or hours. To ensure consistency across events, we created a function to convert all finishing times into total seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
+Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes or hours. To ensure consistency across events, we added a column converting result times into seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
 
 ```{r}
-convert_time = function(x) {
-  sapply(x, function(t) {
-    if (is.na(t) || trimws(t) == "") {
-      return(NA_real_)
-    }
-
-    parts = strsplit(trimws(t), ":")[[1]]
-    nums = suppressWarnings(as.numeric(parts))
-
-    if (any(is.na(nums))) {
-      return(NA_real_)
-    }
-
-    if (length(nums) == 1) {
-      return(nums[1])
-    } else if (length(nums) == 2) {
-      return(nums[1] * 60 + nums[2])
-    } else if (length(nums) == 3) {
-      return(nums[1] * 3600 + nums[2] * 60 + nums[3])
-    } else {
-      return(NA_real_)
-    }
-  })
-}
-
 only_run = only_run %>%
-  mutate(time_seconds = convert_time(result_time))
+  mutate(
+    time_add = case_when(
+      str_count(result_time, ":") == 0 ~ paste0("0:0:", result_time),
+      str_count(result_time, ":") == 1 ~ paste0("0:", result_time),
+    ),
+    time_seconds = as.numeric(hms(time_add))
+  ) %>%
+  select(-time_add)
 
+class(only_run$time_seconds)
+head(only_run$time_seconds)
 ```
 
 Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
@@ -273,20 +254,19 @@ length(unique(only_run$event_name))
 dim(only_run)
 ```
 
-After creating the column `time_seconds` as a conversion of `result_time`, it was realized that some result times may have been entered incorrectly due to being extremely low for the event. The sport and event areas where these occurred were examined, and 29 seemingly incorrect entries were cleaned out based on world record times.
+After creating the column `time_seconds` as a conversion of `result_time`, it was realized that some result times may have been entered incorrectly due to being extremely low for the event. The sport and event areas where these occurred were examined, and 29 seemingly incorrect entries were cleaned out using the world record times as a threshold.
 
 ```{r}
 only_run = only_run %>%
   filter(
     !(sport_name == "Cross Country" & event_name == "8000m" &
-        gender_1 == "M" & time_seconds < 1320),
+        gender == "M" & time_seconds < 1320),
     !(sport_name == "Cross Country" & event_name == "6000m" &
-        gender_1 == "F" & time_seconds < 1080)
+        gender == "F" & time_seconds < 1080)
   )
 
 dim(only_run)
 ```
-
 
 #### Selection of Running Events
 
@@ -340,9 +320,9 @@ Each sport has a unique number of events - cross country and road races have muc
 ```{r}
 xc_events = c("8000m", "6000m", "5000m")
 
-indoor_events = c("60m","60m Hurdles", "200m", "400m", "800m", "Mile", "3000m")
+indoor_events = c("60m", "200m", "400m", "800m", "Mile", "3000m")
 
-outdoor_events = c("100m", "200m", "400m", "800m", "1500m", "1600m", "5000m")
+outdoor_events = c("100m", "200m", "400m", "800m", "1500m", "5000m")
 ```
 
 ```{r}
@@ -367,7 +347,7 @@ ggplot(event_summary, aes(x = count, y = reorder_within(event_name, count, sport
 
 Crucial to our analysis are the time performances of the athletes. The variable `result_time` gives us these times, and they were converted into the lowest unit `time_seconds` for ease of comparison during the cleaning process. Result times are most directly associated with the event being ran and gender. Due to the differences in variety of events per sport, custom summaries per sport are given below.
 
-Figure _ displays distribution of cross country times across the 8000m, 6000m, and 5000m distances. Men typically only run the 8000m, while both men and women run the 6000m and 5000m distances.
+Figure _ displays distribution of cross country times across the 8000m, 6000m, and 5000m distances. Men typically only run the 8000m, while there is data for both men and women in the 6000m and 5000m.
 
 ```{r}
 xc = only_run %>%
@@ -541,7 +521,89 @@ only_run %>%
 *insert content here*
 
 ### RQ3 Natalie
-*insert content here*
+
+When exploring race context, it is imperative to examine the stakes of the races. Everything from time in the season to the race classification can have a physical and/or mental impact on athletes, ultimately influencing how well they perform. Naturally, the first place to start when analyzing race stakes is the season progression - that is, how the performances of athletes change over the course of the season. The importance of races tends to go up as the season progresses, especially as regular season transitions into championship season.
+
+The first visual below explores progressions across the season for the three major events within the sport of cross country. Cross country occurs during the months of August-November, though a majority of meets occur between September and October. Figure _ averages times for each month across all years of data, which spans 2003-2025.
+
+```{r}
+only_run$start_date = as.Date(only_run$start_date, format = "%m/%d/%Y")
+
+xc_monthly = only_run %>%
+  filter(
+    sport_name == "Cross Country", 
+    event_name %in% xc_events, 
+    !(event_name == "6000m" & gender == "M")) %>%
+  mutate(month = month(start_date)) %>%
+  group_by(month, event_name, gender) %>%
+  summarise(mean_time = mean(time_seconds) / 60)
+  
+ggplot(xc_monthly, aes(x = month, y = mean_time, color = gender, group = gender)) +
+  geom_line() +
+  geom_point(size = 2) +
+  facet_wrap(~event_name) +
+  labs(
+    title = "Figure _: Average Cross Country Performances by Month (2003-2025)",
+    x = "Month",
+    y = "Average Race Time (Minutes)",
+    color = "Gender"
+  )
+```
+
+The same visuals were generated for track events. 
+
+```{r}
+indoor_monthly = only_run %>%
+  filter(
+    sport_name == "Indoor Track",
+    event_name %in% indoor_events
+  ) %>%
+  mutate(month = factor(month(start_date), levels = c(12, 1, 2, 3))) %>%
+  group_by(month, event_name, gender) %>%
+  summarise(mean_time = mean(time_seconds)) %>%
+  mutate(event_name = factor(event_name, levels = indoor_events))
+
+
+ggplot(indoor_monthly, aes(x = month, y = mean_time, color = gender, group = gender)) +
+  geom_line() +
+  geom_point(size = 2) +
+  facet_wrap(~event_name, scales = "free_y") +
+  labs(
+    title = "Figure _: Average Indoor Track Performances by Month (2008-2026)",
+    x = "Month",
+    y = "Average Race Time (Seconds)",
+    color = "Gender"
+  )
+```
+
+```{r}
+outdoor_monthly = only_run %>%
+  filter(
+    sport_name == "Outdoor Track",
+    event_name %in% outdoor_events
+  ) %>%
+  mutate(month = month(start_date)) %>%
+  group_by(month, event_name, gender) %>%
+  summarise(mean_time = mean(time_seconds)) %>%
+  mutate(event_name = factor(event_name, levels = outdoor_events))
+
+
+ggplot(outdoor_monthly, aes(x = month, y = mean_time, color = gender, group = gender)) +
+  geom_line() +
+  geom_point(size = 2) +
+  facet_wrap(~event_name, scales = "free_y") +
+  labs(
+    title = "Figure _: Average Outdoor Track Performances by Month (2004-2026)",
+    x = "Month",
+    y = "Average Race Time (Seconds)",
+    color = "Gender"
+  )
+```
+```{r}
+only_run %>%
+  filter(sport_name == "Outdoor Track") %>%
+  count(start_date, sort = TRUE)
+```
 
 
 
