@@ -58,6 +58,9 @@ This dataset is useful to answer our research questions because it provides us w
 The initial dataset contained results from the main collegiate running sports of cross country and track, Because this study focuses specifically on individual running performance, the initial phase of our data cleaning process centered around excluding entries for non-running track events and relay results from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were used to distinguish eligible running events from other athletic competitions. Furthermore, the last 11 columns were excluded from our analysis since they do not pertain to our stated goals. This leaves 59 available variables and around 165000 observations.
 
 ```{r}
+getwd()
+list.files()
+
 run = read.csv('joined.csv')
 dim(run)
 ```
@@ -176,6 +179,11 @@ only_run = only_run %>%
   )
 ```
 
+```{r}
+only_run %>% head(10)
+```
+
+
 Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
 
 ```{r}
@@ -193,6 +201,7 @@ only_run = only_run %>%
   ) %>%
   ungroup()
 ```
+
 
 #### Miscellaneous Variable Cleanup
 
@@ -244,9 +253,30 @@ event_summary = only_run %>%
 event_summary
 ```
 
-#### Selection of Running Events
+#### Distance Classification
 
-After looking at the weather-data availability, we restricted the dataset to cross country, outdoor track, and road racing events with recorded temperature measurements. We selected running distances from the 100 meters all the way up to the half marathon. We did this to see if the relationship between weather conditions and performance differs across race lengths. This what our research question is getting at. Events without sufficient observations and events that were not individual running races were excluded. One road-race 8000-meter observation was also removed because it was the only race at that distance, which didn't provide enough data to calculate a standardized performance measure within its event and gender group. These decisions resulted in a weather-analysis dataset containing 77,088 observations across 12 sport/event combinations. 
+To facilitate comparisons across different race lengths, we created two additional variables: `distance_m` and `distance_category`. The variable `distance_m` represents event distances in meters, while `distance_category` groups events into short-, middle-, and long-distance races. Events of 400 meters or shorter were classified as short distance, events from 800 through 1500 meters were classified as middle distance, and events longer than 1500 meters were classified as long distance. These classifications allow us to investigate whether the relationships between race conditions and performance differ across race lengths while maintaining a consistent dataset for all three research questions.
+
+```{r}
+only_run <- only_run %>%
+  mutate(
+    distance_m = case_when(
+      event_name == "10 Mile" ~ 16093.44,
+      event_name == "Half Marathon" ~ 21097.5,
+      event_name == "Marathon" ~ 42195,
+      event_name == "Mile" ~ 1609.344,
+      str_detect(event_name, "^\\d+m$") ~
+        as.numeric(str_remove(event_name, "m$")),
+      TRUE ~ NA_real_
+    ),
+    distance_category = case_when(
+      distance_m <= 400 ~ "Short Distance",
+      distance_m <= 1500 ~ "Middle Distance",
+      distance_m > 1500 ~ "Long Distance",
+      TRUE ~ NA_character_
+    )
+  )
+```
 
 ### 3.2 Data Summary
 
