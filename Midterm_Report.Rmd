@@ -83,7 +83,7 @@ dim(only_run)
 
 ```{r}
 # Next, grab only columns that could pertain to research questions
-# Exclude relay columns, racewalk columns
+# Exclude relay columns, racewalk columns, road races
 
 only_run = only_run %>% 
   select(1:59) %>%
@@ -182,17 +182,20 @@ only_run %>%
 
 ### Date Column Merge
 
-For dates, we need to combine all of the date columns into one. We found that the variables `start_date` and `end_date` were both full of data values, and `date_of_event` missing many values. In finding the difference in days of the start date and end date, we find that there are only 10 dates with a two-day difference in start to end. Thus, we determined to make one full `date` variable that has all of the start dates in them, since the difference in days is not going to effect the racers times.
+There are multiple date columns in this dataset; we determined we could merge into one full `date` variable that has all of the start dates in them, since the small range of dates for each meet/race is not going to affect the racers times. We found that the variables `start_date` and `end_date` contained no missing values, while `date_of_event` missing many values. In finding the difference in days of the start date and end date, we find that only ~3% of entries had a different start and end dates, indicating meets occurred on a single day. Thus, we chose the `start_date` column to be the one date column.
 
 ```{r}
-diff_days <- abs(as.numeric(only_run$start_date - only_run$end_date)) / (60 * 60 * 24)
-summary(diff_days)
+only_run = only_run %>%
+  mutate(start_date = ymd(start_date), end_date   = ymd(end_date))
 
+diff_days = abs(as.numeric(only_run$start_date - only_run$end_date))
+
+summary(diff_days)
 sum(diff_days > 1, na.rm = TRUE)
 sum(diff_days > 2, na.rm = TRUE)
 
-only_run <- only_run %>%
-  mutate(date = start_of_date) %>%
+only_run = only_run %>%
+  mutate(date = start_date) %>%
   select(-start_date, -end_date, -date_of_event)
 ```
 
@@ -213,10 +216,6 @@ only_run = only_run %>%
 
 class(only_run$time_seconds)
 head(only_run$time_seconds)
-```
-
-```{r}
-only_run %>% head(10)
 ```
 
 Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
@@ -384,6 +383,13 @@ The numerous variables in the NRCD dataset can be grouped based on shared charac
 Table _ below displays the counts of entries under each classification and the total percent that each make up in the larger dataset. This table is designed to show the overlap that occurs between classifications - for instance, all regional and national meets are also classified as NIRCA (club) running meets only. There are some NIRCA-only regular season meets as well as meets that fall outside the NIRCA designation (could be NCAA, road races, etc.)
 
 ```{r}
+only_run = only_run %>%
+  mutate(
+    regionals = as.logical(regionals),
+    nationals = as.logical(nationals),
+    nirca_only = as.logical(nirca_only)
+  )
+
 stakes_summary = only_run %>%
   count(regionals, nationals, nirca_only, name = "count") %>%
   mutate(percentage = count / sum(count) * 100)
@@ -403,7 +409,7 @@ stakes_summary_class = stakes_summary %>%
       !regionals & !nationals & !nirca_only ~ "Open / Non-NIRCA Meets",
       !regionals & !nationals & nirca_only  ~ "NIRCA Regular Season",
       !regionals & nationals & nirca_only   ~ "NIRCA Nationals",
-      regionals & !nationals & nirca_only   ~ "NIRCA Regionals",
+      regionals & !nationals & nirca_only   ~ "NIRCA Regionals"
     )
   )
 
@@ -944,17 +950,15 @@ We can clearly see in these scatter plots that elevation gain and loss, respecti
 
 When exploring race context, it is imperative to examine the stakes of the races. Everything from time in the season to the race classification can have a physical and/or mental impact on athletes, ultimately influencing how well they perform. Naturally, the first place to start when analyzing race stakes is the season progression - that is, how the performances of athletes change over the course of the season. The importance of races tends to go up as the season progresses, especially as regular season transitions into championship season.
 
-The first visual below explores progressions across the season for the three major events within the sport of cross country. Cross country occurs during the months of August-November, though a majority of meets occur between September and October. Figure _ averages times for each month across all years of data, which spans 2003-2025.
+The first visuals below explore progressions across the season for major events within the sports. These visuals use raw result times since each season occurs across a different span of months. Cross country occurs during the months of August-November, though a majority of meets occur between September and October. Figure _ averages times for each month across all years of data, which spans 2003-2025.
 
 ```{r}
-only_run$start_date = as.Date(only_run$start_date, format = "%m/%d/%Y")
-
 xc_monthly = only_run %>%
   filter(
     sport_name == "Cross Country", 
     event_name %in% xc_events, 
     !(event_name == "6000m" & gender == "M")) %>%
-  mutate(month = month(start_date)) %>%
+  mutate(month = month(date)) %>%
   group_by(month, event_name, gender) %>%
   summarise(mean_time = mean(time_seconds) / 60)
   
@@ -970,7 +974,7 @@ ggplot(xc_monthly, aes(x = month, y = mean_time, color = gender, group = gender)
   )
 ```
 
-The same visuals were generated for track events. 
+The same visuals were generated for the sport of track. These visuals display a variety of events spanning a wider range of distances, from short sprints to long distances. Indoor track typically occurs during the months of December-March, and average seasonal progressions across recorded years 2008-2026 are displayed below in Figure _.
 
 ```{r}
 indoor_monthly = only_run %>%
@@ -978,7 +982,7 @@ indoor_monthly = only_run %>%
     sport_name == "Indoor Track",
     event_name %in% indoor_events
   ) %>%
-  mutate(month = factor(month(start_date), levels = c(12, 1, 2, 3))) %>%
+  mutate(month = factor(month(date), levels = c(12, 1, 2, 3))) %>%
   group_by(month, event_name, gender) %>%
   summarise(mean_time = mean(time_seconds)) %>%
   mutate(event_name = factor(event_name, levels = indoor_events))
@@ -996,13 +1000,15 @@ ggplot(indoor_monthly, aes(x = month, y = mean_time, color = gender, group = gen
   )
 ```
 
+The same visual was generated in Figure _ for outdoor track. The types of events are slightly different but still span events from short sprints to long distances. Outdoor track typically runs from spring to summer months, which is reflected below.
+
 ```{r}
 outdoor_monthly = only_run %>%
   filter(
     sport_name == "Outdoor Track",
     event_name %in% outdoor_events
   ) %>%
-  mutate(month = month(start_date)) %>%
+  mutate(month = month(date)) %>%
   group_by(month, event_name, gender) %>%
   summarise(mean_time = mean(time_seconds)) %>%
   mutate(event_name = factor(event_name, levels = outdoor_events))
@@ -1019,11 +1025,39 @@ ggplot(outdoor_monthly, aes(x = month, y = mean_time, color = gender, group = ge
     color = "Gender"
   )
 ```
+
 ```{r}
-only_run %>%
-  filter(sport_name == "Outdoor Track") %>%
-  count(start_date, sort = TRUE)
+only_run = only_run %>%
+  mutate(
+    stake_category = case_when(
+      !regionals & !nationals & !nirca_only ~ "Open / Non-NIRCA Meets",
+      !regionals & !nationals & nirca_only  ~ "Regular",
+      !regionals & nationals & nirca_only   ~ "Nationals",
+      regionals & !nationals & nirca_only   ~ "Regionals"
+    )
+  )
+
+xc_stakes = only_run %>%
+  filter(
+    sport_name == "Cross Country",
+    event_name %in% xc_events & event_name != '5000m',
+    stake_category != "Open / Non-NIRCA Meets"
+    ) %>%
+  mutate(stake_category = factor(
+    stake_category,
+    levels = c("Regular","Regionals","Nationals"))
+    )
+
+ggplot(xc_stakes, aes(x = stake_category, y = time_seconds / 60)) +
+  geom_boxplot() +
+  facet_wrap(~event_name, scales = "free_y") +
+  labs(
+    title = "Figure _: Cross Country Performance by Race Stakes",
+    x = "Race Stakes",
+    y = "Race Time (Minutes)"
+  )
 ```
+
 
 
 
@@ -1035,6 +1069,7 @@ Our preliminary analysis suggests that the relationships between weather conditi
 Further investigation revealed that several of the most pronounced patterns were heavily influenced by individual meets. In particular, the middle-distance spikes for temperature, humidity, and wind speed each contained 46 race results from a single meet, with an identical average standardized time of 1.208. Additionally, 95.2% of the 580 long-distance results in the 20–22 wind-speed interval came from one meet. These findings suggest that some apparent weather-related patterns may reflect characteristics of specific competitions rather than broader relationships between weather and performance.
 
 Overall, our findings provide preliminary evidence that weather conditions may be associated with running performance differently across race distances, but the strength and direction of these relationships remain uncertain. In our final analysis, we plan to investigate these relationships more systematically while accounting for differences between meets and other factors that may influence race times. This will help us determine whether the patterns observed in our exploratory visualizations persist after considering potential confounding variables.
+
 #### RQ2 Seamus
 *insert content here*
 
