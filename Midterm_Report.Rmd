@@ -375,7 +375,7 @@ xc = only_run %>%
   mutate(time_minutes = time_seconds / 60)
   
 
-ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender_1)) +
+ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender)) +
   geom_violin() +
   labs(
     title = "Figure _: Time Distributions by Cross Country Event",
@@ -386,11 +386,12 @@ ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender_1)) +
 ```
 
 The track events are much more numerous, so average and median times for the most common events are provided in Tables _ and _ below.
+
 ```{r}
 indoor_summary = only_run %>%
   filter(sport_name == "Indoor Track",
          event_name %in% indoor_events) %>%
-  group_by(event_name, gender_1) %>%
+  group_by(event_name, gender) %>%
   summarise(
     mean_time = round(mean(time_seconds), 2),
     median_time = round(median(time_seconds), 2),
@@ -404,7 +405,7 @@ kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "M
 outdoor_summary = only_run %>%
   filter(sport_name == "Outdoor Track",
          event_name %in% outdoor_events) %>%
-  group_by(event_name, gender_1) %>%
+  group_by(event_name, gender) %>%
   summarise(
     mean_time = round(mean(time_seconds), 2),
     median_time = round(median(time_seconds), 2),
@@ -414,12 +415,7 @@ outdoor_summary = only_run %>%
 kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table _: Average and Median Times for Outdoor Track Events")
 ```
 
-For the "Altitude and Elevation" variables, we have `altitude`, `elevation_gain`, and 
-`elevation_loss`. Each of these give us a further understanding of some of the conditions
-of the location the runners are competing at. For each of those variables, here we feature
-simple statistics for each in the overall dataset, as well as histograms providing further
-visualization of each variable. We know as a result of this information that we should be
-able to find them statistically significant for our research questions.
+For the "Altitude and Elevation" variables, we have `altitude`, `elevation_gain`, and `elevation_loss`. Each of these give us a further understanding of some of the conditions of the location the runners are competing at. For each of those variables, here we feature simple statistics for each in the overall dataset, as well as histograms providing further visualization of each variable. We know as a result of this information that we should be able to find them statistically significant for our research questions.
 
 ```{r}
 only_run %>%
@@ -468,11 +464,7 @@ ggplot(only_run, aes(x = elevation_loss)) +
   )
 ```
 
-For the "Location" variables, we have three main variables: `meet_state`, `meet_city`,
-`meet_id`. We have a couple numerical summaries, one of which provides us the count for
-each meet location, featuring Pennsylvania, Virginia, and Michigan at the top. We also
-see the unique number of states, cities, and meets, at 39, 358, and 1412, respectively.
-Finally, we have a bar graph visualizing the number of meets at each state.
+For the "Location" variables, we have three main variables: `meet_state`, `meet_city`,`meet_id`. We have a couple numerical summaries, one of which provides us the count for each meet location, featuring Pennsylvania, Virginia, and Michigan at the top. We also see the unique number of states, cities, and meets, at 39, 358, and 1412, respectively. Finally, we have a bar graph visualizing the number of meets at each state.
 
 ```{r}
 
@@ -498,11 +490,7 @@ ggplot(only_run, aes(x = meet_state)) +
   )
 ```
 
-For the "Gender" variable, we have a `gender_1` variable which contains every single 
-individual athletes gender. We can see that males make up about 63.22% of all the 
-runners in this data set, and females the remaining 36.78% of runners. We also have 
-a simple graph showing the two differences. This will be important information to be
-aware of as we dive into research questions.
+For the "Gender" variable, we have a `gender_1` variable which contains every single individual athletes gender. We can see that males make up about 63.22% of all the runners in this data set, and females the remaining 36.78% of runners. We also have a simple graph showing the two differences. This will be important information to be aware of as we dive into research questions.
 
 ```{r}
 only_run %>%
@@ -518,12 +506,7 @@ ggplot(only_run, aes(x = gender)) +
   )
 ```
 
-For the "Team" variables, we mainly have the `team_name` that each individual runner 
-resides from. We see that across all the athletes in the data set, they come from a 
-combined 190 schools/programs. The graph visualizes for us the schools with the top 
-15 most participation in this data set. This information will help us determine the
-effects that a school's location and training place for their athletes has on their
-race times. 
+For the "Team" variables, we mainly have the `team_name` that each individual runner resides from. We see that across all the athletes in the data set, they come from a combined 190 schools/programs. The graph visualizes for us the schools with the top 15 most participation in this data set. This information will help us determine the effects that a school's location and training place for their athletes has on their race times.
 
 ```{r}
 only_run %>% 
