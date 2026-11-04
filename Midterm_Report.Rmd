@@ -144,19 +144,18 @@ only_run = only_run %>%
 
 #### Weather Data Completeness
 
-```{r, include=FALSE}
-weather_by_sport <- only_run %>%
+
+```{r}
+only_run %>%
   group_by(sport_name) %>%
   summarise(
     total_results = n(),
     weather_results = sum(weather_true),
-    weather_percent = round(
-      mean(weather_true) * 100, 2),
-    .groups = "drop")
-kable(
-  weather_by_sport,
-  caption = "Weather Data Availability by Sport")
+    weather_percent = round(mean(weather_true) * 100, 2)
+  ) %>%
+  knitr::kable()
 ```
+
 
 Weather variables contain substantial missing data, making it necessary to evaluate their completeness before analysis. Temperature, humidity, and wind speed each have 64.61% missing observations in the cleaned dataset. Other variables, including precipitation (96.32% missing), snow measurements (100%), and UV index (100%), have considerably less available information. Therefore, temperature, humidity, and wind speed were selected as the primary weather variables for our analysis.
 
@@ -318,7 +317,7 @@ dim(only_run)
 To facilitate comparisons across different race lengths, we created two additional variables: `distance_m` and `distance_category`. The variable `distance_m` represents event distances in meters, while `distance_category` groups events into short-, middle-, and long-distance races. Events of 400 meters or shorter were classified as short distance, events from 800 through 1500 meters were classified as middle distance, and events longer than 1500 meters were classified as long distance. These classifications allow us to investigate whether the relationships between race conditions and performance differ across race lengths while maintaining a consistent dataset for all three research questions.
 
 ```{r}
-only_run <- only_run %>%
+only_run = only_run %>%
   mutate(
     distance_m = case_when(
       event_name == "10 Mile" ~ 16093.44,
@@ -341,7 +340,7 @@ only_run <- only_run %>%
 To facilitate comparisons across different race conditions, we created categorical variables for temperature, humidity, and race stakes. Temperature measurements were grouped into cold, cool, mild, and hot conditions, while humidity was classified as low, moderate, or high. These categories simplify the interpretation of weather conditions while preserving the original numerical measurements for more detailed analysis. We also created a race classification variable using the existing national, regional, and NIRCA-only indicators. This allows us to compare performances across different levels of competition. All new variables were added to the shared cleaned dataset so they could be used consistently across the three research questions.
 
 ```{r}
-only_run <- only_run %>%
+only_run = only_run %>%
   mutate(
     temperature_category = case_when(
       temperature < 40 ~ "Cold",
@@ -360,7 +359,7 @@ only_run %>% count(humidity_category)
 ```
 
 ```{r}
-weather_run <- only_run %>%
+weather_run = only_run %>%
   filter(
     sport_name %in% c("Cross Country", "Outdoor Track"),
     !is.na(temperature),
@@ -501,49 +500,32 @@ kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "
 
 To better understand the environmental conditions represented in our dataset, we examined the distributions of temperature, humidity, and wind speed. These variables were selected because they have relatively complete data compared to other weather measurements. The following summaries use outdoor running results with recorded weather measurements, allowing us to describe the conditions under which athletes competed. We calculated descriptive statistics and examined the distribution of temperatures to identify typical race conditions and the extent to which extreme weather is represented.
 
-```{r}
-weather_summary <- weather_run %>%
-  summarise(
-    across(
-      c(temperature, humidity, wind_speed),
-      list(
-        Mean = ~ mean(.x, na.rm = TRUE),
-        SD = ~ sd(.x, na.rm = TRUE),
-        Min = ~ min(.x, na.rm = TRUE),
-        Median = ~ median(.x, na.rm = TRUE),
-        Max = ~ max(.x, na.rm = TRUE)))) %>%
-  tidyr::pivot_longer(
-    everything(),
-    names_to = c("Variable", ".value"),
-    names_pattern = "^(.*)_(Mean|SD|Min|Median|Max)$")
 
-knitr::kable(
-  weather_summary,
-  digits = 2,
-  col.names = c(
-    "Weather Variable",
-    "Mean",
-    "Standard Deviation",
-    "Minimum",
-    "Median",
-    "Maximum"),
-  caption = "Descriptive Statistics for Weather Conditions")
+```{r}
+weather_summary = data.frame(
+  Variable = c("Temperature", "Humidity", "Wind Speed"),
+  Mean = sapply(weather_run[c("temperature", "humidity", "wind_speed")], mean),
+  SD = sapply(weather_run[c("temperature", "humidity", "wind_speed")], sd),
+  Min = sapply(weather_run[c("temperature", "humidity", "wind_speed")], min),
+  Median = sapply(weather_run[c("temperature", "humidity", "wind_speed")], median),
+  Max = sapply(weather_run[c("temperature", "humidity", "wind_speed")], max)
+)
+
+knitr::kable(weather_summary, digits = 2, row.names = FALSE)
 ```
+
 This information shows that the outdoor races in our weather-analysis dataset occurred under a wide range of environmental conditions. The average temperature was 57.85°F, with recorded temperatures ranging from 30.15°F to 93.61°F. Relative humidity averaged 63.55%, ranging from 24% to 100%, while wind speed averaged 8.59, with values ranging from 0 to 23.02. These differences indicate that our dataset includes a variety of weather conditions, providing an opportunity to investigate how temperature, humidity, and wind speed relate to running performance across different race distances.
 
 To further examine the weather conditions represented in our dataset, we created a histogram showing the distribution of recorded race temperatures. This visualization allows us to identify the most common temperature ranges and evaluate how well unusually hot or cold conditions are represented.
 
+
 ```{r}
 ggplot(weather_run, aes(x = temperature)) +
-  geom_histogram(
-    binwidth = 5,
-    fill = "lightblue",
-    color = "white") +
-  labs(
-    title = "Distribution of Race Temperatures",
-    x = "Temperature (°F)",
-    y = "Number of Race Results") +theme_minimal()
+  geom_histogram(binwidth = 5, fill = "gray", color = "black") +
+  labs(x = "Temperature", y = "Number of Race Results")
 ```
+
+
 The distribution of race temperatures is concentrated primarily between 45°F and 75°F, with the highest frequency occurring around 60°F. Temperatures become less common toward both extremes, particularly above 80°F. This indicates that most recorded performances occurred under relatively moderate temperatures, while unusually hot conditions are less represented. The uneven distribution of observations across temperatures is important to consider when interpreting performance trends, as estimates at extreme temperatures may be less reliable due to smaller sample sizes.
 
 For the "Altitude and Elevation" variables, we have `altitude`, `elevation_gain`, and `elevation_loss`. Each of these give us a further understanding of some of the conditions of the location the runners are competing at. For each of those variables, here we feature simple statistics for each in the overall dataset, as well as histograms providing further visualization of each variable. We know as a result of this information that we should be able to find them statistically significant for our research questions.
@@ -676,50 +658,24 @@ To visualize these relationships, weather measurements were grouped into five-de
 
 We first examined the relationship between temperature and standardized race time across the three distance categories. Because higher standardized values indicate slower performances relative to the event average, an upward trend would suggest an association between warmer temperatures and slower race times. Comparing the three distance categories allows us to explore whether this relationship differs by race length.
 
-```{r temperature_performance, fig.width=11, fig.height=5, fig.cap="Figure 2. Temperature and Running Performance by Distance"}
-temperature_performance <- weather_run %>%
-  mutate(
-    temperature_bin = floor(temperature / 5) * 5) %>%
-  group_by(distance_category, temperature_bin) %>%
 
-summarise(
-  mean_standardized_time = mean(
-    standardized_time, na.rm = TRUE),
-  number_of_results = sum(!is.na(standardized_time)),
-  number_of_meets = n_distinct(meet_id),
-  .groups = "drop") %>%
-filter(number_of_results >= 30)
+```{r}
+temp_summary = weather_run %>%
+  mutate(temp_group = floor(temperature / 5) * 5) %>%
+  group_by(distance_category, temp_group) %>%
+  summarise(
+    avg_time = mean(standardized_time, na.rm = TRUE),
+    n = n(),
+    .groups = "drop") %>%
+  filter(n >= 30)
 
-ggplot(
-  temperature_performance,
-  aes(
-    x = temperature_bin + 2.5,
-    y = mean_standardized_time,
-    color = distance_category,
-    group = distance_category)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray60") +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2.5) +
-  facet_wrap(~ distance_category, nrow = 1) +
-  scale_color_manual(
-    values = c(
-      "Short Distance" = "#7CB9E8",
-      "Middle Distance" = "#8BC9A3",
-      "Long Distance" = "#7570B3"),
-    guide = "none") +
-  labs(
-    title = "Figure _. Temperature and Running Performance by Distance",
-    subtitle = "Average standardized race time across 5-degree temperature intervals",
-    x = "Temperature (°F)",
-    y = "Average Standardized Race Time") +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.border = element_rect(color = "gray70", fill = NA),
-    panel.spacing = grid::unit(1.5, "lines"),
-    strip.background = element_rect(fill = "gray95", color = "gray70"),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(face = "bold", size = 15))
+ggplot(temp_summary, aes(x = temp_group, y = avg_time)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~distance_category) +
+  labs(x = "Temperature", y = "Average Standardized Race Time")
 ```
+
 
 The relationship between temperature and standardized performance appears to vary across race distances. Long-distance events show a generally increasing trend in standardized times at warmer temperatures, suggesting that higher temperatures may be associated with slower relative performances. However, this relationship is not consistent across all intervals. Short-distance performances fluctuate around zero without a clear overall trend. Middle-distance results show a particularly large positive spike near 67.5°F, indicating substantially slower-than-average performances within that interval. This unusual value warrants further investigation to determine whether it reflects a broader weather-related pattern or results from a small number of meets.
 
@@ -727,50 +683,23 @@ The relationship between temperature and standardized performance appears to var
 
 Next, we examined whether relative humidity is associated with standardized race times. Higher humidity can influence the body's ability to dissipate heat, potentially affecting performance during prolonged exercise. By comparing the three distance categories, we aim to identify whether longer races exhibit different patterns from shorter events as humidity increases.
 
-```{r humidity_performance, fig.width=11, fig.height=5, fig.cap="Figure 3. Humidity and Running Performance by Distance"}
-humidity_performance <- weather_run %>%
-  mutate(
-    humidity_bin = floor(humidity / 5) * 5) %>%
-  group_by(distance_category, humidity_bin) %>%
+```{r}
+humidity_summary = weather_run %>%
+  mutate(humidity_group = floor(humidity / 5) * 5) %>%
+  group_by(distance_category, humidity_group) %>%
+  summarise(
+    avg_time = mean(standardized_time, na.rm = TRUE),
+    n = n(),
+    .groups = "drop") %>%
+  filter(n >= 30)
 
-summarise(
-  mean_standardized_time = mean(
-    standardized_time, na.rm = TRUE),
-  number_of_results = sum(!is.na(standardized_time)),
-  number_of_meets = n_distinct(meet_id),
-  .groups = "drop") %>%
-filter(number_of_results >= 30)
-
-ggplot(
-  humidity_performance,
-  aes(
-    x = humidity_bin + 2.5,
-    y = mean_standardized_time,
-    color = distance_category,
-    group = distance_category)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray60") +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2.5) +
-  facet_wrap(~ distance_category, nrow = 1) +
-  scale_color_manual(
-    values = c(
-      "Short Distance" = "#7CB9E8",
-      "Middle Distance" = "#8BC9A3",
-      "Long Distance" = "#7570B3"),
-    guide = "none") +
-  labs(
-    title = "Figure _. Humidity and Running Performance by Distance",
-    subtitle = "Average standardized race time across 5% humidity intervals",
-    x = "Relative Humidity (%)",
-    y = "Average Standardized Race Time") +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.border = element_rect(color = "gray70", fill = NA),
-    panel.spacing = grid::unit(1.5, "lines"),
-    strip.background = element_rect(fill = "gray95", color = "gray70"),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(face = "bold", size = 15))
+ggplot(humidity_summary, aes(x = humidity_group, y = avg_time)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~distance_category) +
+  labs(x = "Relative Humidity (%)", y = "Average Standardized Race Time")
 ```
+
 
 The relationship between humidity and standardized race time differs across distance categories. Long-distance performances remain relatively close to the event average across most humidity intervals, with somewhat higher standardized times at the highest humidity levels. Middle-distance results show a pronounced positive spike near 32.5% humidity, followed by substantially lower standardized times at higher humidity levels. Short-distance results also exhibit an unusually high average standardized time near 32.5% humidity, while most other intervals remain close to or below zero. These patterns do not suggest a consistent relationship between increasing humidity and slower performance, but they identify several unusual intervals that may be influenced by individual meets.
 
@@ -778,100 +707,65 @@ The relationship between humidity and standardized race time differs across dist
 
 Finally, we examined the relationship between wind speed and standardized race time. Unlike temperature and humidity, the influence of wind may depend heavily on its direction relative to the runner, as headwinds and tailwinds can have different effects on performance. Although our analysis uses wind speed rather than runner-relative wind direction, the visualization provides an initial opportunity to examine whether performance patterns vary across race distances as wind speed changes.
 
-```{r wind_performance, fig.width=11, fig.height=5, fig.cap="Figure 4. Wind Speed and Running Performance by Distance"}
-wind_performance <- weather_run %>%
-  mutate(wind_bin = floor(wind_speed / 2) * 2) %>%
-  group_by(distance_category, wind_bin) %>%
 
-summarise(
-  mean_standardized_time = mean(standardized_time, na.rm = TRUE),
-  number_of_results = sum(!is.na(standardized_time)),
-  number_of_meets = n_distinct(meet_id),
-  .groups = "drop") %>%
-  filter(number_of_results >= 30)
+```{r}
+wind_summary = weather_run %>%
+  mutate(wind_group = floor(wind_speed / 2) * 2) %>%
+  group_by(distance_category, wind_group) %>%
+  summarise(
+    avg_time = mean(standardized_time, na.rm = TRUE),
+    n = n(),
+    .groups = "drop") %>%
+  filter(n >= 30)
 
-ggplot(
-  wind_performance,
-  aes(
-    x = wind_bin + 1,
-    y = mean_standardized_time,
-    color = distance_category,
-    group = distance_category)) +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "gray60") +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2.5) +
-  facet_wrap(~ distance_category, nrow = 1) +
-  scale_color_manual(
-    values = c(
-      "Short Distance" = "#7CB9E8",
-      "Middle Distance" = "#8BC9A3",
-      "Long Distance" = "#7570B3"),
-    guide = "none") +
-  labs(
-    title = "Figure _. Wind Speed and Running Performance by Distance",
-    subtitle = "Average standardized race time across 2-unit wind-speed intervals",
-    x = "Wind Speed",
-    y = "Average Standardized Race Time") +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.border = element_rect(color = "gray70", fill = NA),
-    panel.spacing = grid::unit(1.5, "lines"),
-    strip.background = element_rect(fill = "gray95", color = "gray70"),
-    strip.text = element_text(face = "bold"),
-    plot.title = element_text(face = "bold", size = 15))
+ggplot(wind_summary, aes(x = wind_group, y = avg_time)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~distance_category) +
+  labs(x = "Wind Speed", y = "Average Standardized Race Time")
 ```
+
 Wind speed shows different patterns across the three distance categories. Long-distance events exhibit a generally decreasing trend in standardized race times as wind speed increases, suggesting that higher recorded wind speeds are associated with faster relative performances in this sample. However, this pattern is irregular and does not necessarily indicate that wind improves performance. Middle-distance events show unusually high standardized times at very low wind speeds, followed by values closer to zero as wind speed increases. Short-distance events display a similar positive spike at low wind speeds, while most remaining intervals fluctuate around or below zero. Because wind direction relative to runners is not accounted for, and several unusual values occur within specific intervals, these findings should be interpreted cautiously.
 
 ##### Investigation of Unusual Weather-Performance Patterns
 
 After examining the three weather-performance visualizations, we investigated selected intervals with unusually high or low average standardized times. Because multiple athletes may compete at the same meet under similar environmental conditions, we examined both the number of individual race results and the number of distinct meets contributing to these intervals. This helps determine whether unusual patterns are supported by multiple competitions or are concentrated within a single meet.
 
+
 ```{r}
-# Investigate unusual weather intervals by calculating
-# the number of results, number of meets, and percentage
-# of results contributed by the largest meet.
-
-spikes <- tibble(
-  weather_variable = c(
-    "temperature", "temperature",
-    "humidity", "humidity", "humidity",
-    "wind_speed", "wind_speed", "wind_speed"),
-  distance_category = c(
-    "Middle Distance", "Short Distance",
-    "Middle Distance", "Short Distance", "Long Distance",
-    "Short Distance", "Middle Distance", "Long Distance"),
-  bin_start = c(
-    65, 65,
-    30, 30, 95,
-    2, 0, 20),
-  bin_width = c(
-    5, 5,
-    5, 5, 5,
-    2, 2, 2))
-
-spike_results <- purrr::pmap_dfr(spikes, function(weather_variable, distance_category, bin_start, bin_width) {subset <- weather_run %>%
-      filter(.data$distance_category == .env$distance_category,
-        !is.na(.data[[weather_variable]]),
-        .data[[weather_variable]] >= bin_start,
-        .data[[weather_variable]] < bin_start + bin_width)
-
-    tibble(Weather = weather_variable,
-      Distance = distance_category,
-      Interval = paste0(bin_start, " to ", bin_start + bin_width),
-      Results = nrow(subset),
-      Meets = n_distinct(subset$meet_id),
-      Mean_Z = round(mean(subset$standardized_time, na.rm = TRUE), 3),
-      Largest_Meet_Share = if (nrow(subset) > 0) {round(
-          100 * max(table(subset$meet_id)) / nrow(subset),
-          1)} else {NA_real_})})
-
-knitr::kable(spike_results,
-col.names = c(
-  "Weather", "Distance", "Interval",
-  "Results", "Meets", "Mean Z-Score",
-  "Largest Meet (%)"),
-  caption = "Investigation of Unusual Weather-Performance Intervals")
+weather_intervals = bind_rows(
+  mutate(weather_run, weather = "Temperature",
+         interval = floor(temperature / 5) * 5),
+  mutate(weather_run, weather = "Humidity",
+         interval = floor(humidity / 5) * 5),
+  mutate(weather_run, weather = "Wind Speed",
+         interval = floor(wind_speed / 2) * 2))
+unusual = weather_intervals %>%
+  filter(
+    (weather == "Temperature" & interval == 65 &
+       distance_category %in% c("Short Distance", "Middle Distance")) |
+    (weather == "Humidity" & interval == 30 &
+       distance_category %in% c("Short Distance", "Middle Distance")) |
+    (weather == "Humidity" & interval == 95 &
+       distance_category == "Long Distance") |
+    (weather == "Wind Speed" & interval == 2 &
+       distance_category == "Short Distance") |
+    (weather == "Wind Speed" & interval == 0 &
+       distance_category == "Middle Distance") |
+    (weather == "Wind Speed" & interval == 20 &
+       distance_category == "Long Distance")) %>%
+  group_by(weather, distance_category, interval) %>%
+  summarise(
+    results = n(),
+    meets = n_distinct(meet_id),
+    avg_time = round(mean(standardized_time), 3),
+    largest_share = round(100 * max(table(meet_id)) / n(), 1),
+    .groups = "drop")
+knitr::kable(unusual)
 ```
+
+
+
 
 Further investigation revealed that several unusual spikes in our weather-performance visualizations were concentrated within individual meets. Of the eight intervals examined, three contained results from only one meet. Most notably, the middle-distance spikes observed at temperatures of 65–70°F, humidity levels of 30–35%, and wind speeds of 0–2 each contained 46 race results from a single meet, with an identical average standardized time of 1.208. This strongly suggests that the same competition may be responsible for all three unusual patterns rather than three separate weather-related effects.
 
