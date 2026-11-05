@@ -577,11 +577,14 @@ only_run %>%
 ```
 
 ```{r echo=FALSE}
-ggplot(only_run, aes(x = meet_state)) + 
+only_run %>%
+  add_count(meet_state) %>%
+  filter(n > 500) %>%
+  ggplot(aes(x = meet_state)) + 
   geom_bar() + 
   coord_flip() +
   labs(
-    title = "Figure 8: Number of Races by State",
+    title = "Number of Races by State",
     x = "State",
     y = "Number of Races"
   )
@@ -594,9 +597,9 @@ only_run %>%
   count(gender) %>% 
   mutate(percent = n / sum(n) * 100)
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, fig.height=3, fig.width=5}
 ggplot(only_run, aes(x = gender)) + 
-  geom_bar() + 
+  geom_bar(width = 0.5) + 
   labs(
     title = "Figure 9: Number of Race Results by Gender",
     x = "Gender",
