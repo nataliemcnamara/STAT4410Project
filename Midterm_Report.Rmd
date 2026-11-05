@@ -717,7 +717,7 @@ Further investigation revealed that several unusual spikes in our weather-perfor
 
 Other intervals also showed substantial concentration within individual meets. For example, the short-distance wind-speed interval of 2–4 contained 33 results from one meet, while 95.2% of the 580 long-distance results in the 20–22 wind-speed interval came from a single competition. In contrast, the long-distance humidity interval of 95–100% included 585 results across 10 meets, with no individual meet contributing more than 26.2% of observations. These findings demonstrate that the number of race results alone does not necessarily indicate how broadly a pattern is represented across competitions. Because athletes competing at the same meet may share weather conditions and other race characteristics, apparent relationships should be interpreted cautiously, particularly when observations are concentrated within a small number of meets.
 
-#### RQ2 Seamus
+#### RQ2: Altitude, Elevation, and Team Location Exploration
 
 For starters, we had some outliers on standardized time that were over 5 standard deviations away, causing the graphs to look messy and unreadable. We agreed that was too high, and there were only ~200 of those out of the other thousands of rows. We removed those with more than five standard deviations.
 
