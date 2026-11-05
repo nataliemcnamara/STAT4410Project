@@ -804,7 +804,7 @@ only_run %>%
 
 We can see based off this box plot that the median indicates that moderate level of altitudes find an average standardization score of 0, which is about an average score in this set of race times. For both High and Low altitudes, we can see that the median hovers around -0.1 or -0.2 for both, indicating that runners tend to score slightly above average in those altitudes. For Very High altitudes, we see a median of about -0.5, which is significantly above the average score. Therefore, we can conclude that altitude of the, for the most part, is not super significant for race times aside from those with Very High altitudes.
 
-We also can look at elevation gain and elevation loss. We don't have nearly as much data on this as altitude, but still is good to understand how, if at all, the elevation gain and elevation loss is effecting the runner's performances.
+We also can look at elevation gain and elevation loss. We don't have nearly as much data on this as altitude, but still is good to understand how, if at all, the elevation gain and elevation loss is effecting the runner's performances. Figure 15 below shows how the standardized race results change based on elevation gain.
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(
@@ -819,7 +819,11 @@ ggplot(
     x = "Race Elevation Gain",
     y = "Standardized Time"
   )
+```
 
+Figure 16 below is similar, showing how standardized race times change as a result of elevation loss.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(
   only_run %>%
     filter(!is.na(elevation_loss), !is.na(standardized_time)),
@@ -836,7 +840,7 @@ ggplot(
 
 We can clearly see in these scatter plots that elevation gain and loss, respectively, have a positive, yet very weak correlation. We can conclude that the two variables attached with standardized scores have some tendency to increase together, but the relationship is not very reliable due to it being very weak in nature. The results from this graph, as well as the lack of amount of elevation gain and loss data in the data set, may likely reasonably lead us to take out elevation from the analysis for runner performance.
 
-We also can investigate the performances of athletes based on the team location. Due to the large number of teams, we start of by looking at the top 15 teams with the most participants and see their results.
+We also can investigate the performances of athletes based on the team location. Due to the large number of teams, we start of by looking at the top 15 teams with the most participants and see their results. Figure 17 below displays these teams.
 
 ```{r echo=FALSE}
 team_counts = only_run %>%
