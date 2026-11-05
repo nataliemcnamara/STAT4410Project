@@ -1032,7 +1032,7 @@ Further investigation revealed that several of the most pronounced patterns were
 
 Overall, our findings provide preliminary evidence that weather conditions may be associated with running performance differently across race distances, but the strength and direction of these relationships remain uncertain. In our final analysis, we plan to investigate these relationships more systematically while accounting for differences between meets and other factors that may influence race times. This will help us determine whether the patterns observed in our exploratory visualizations persist after considering potential confounding variables.
 
-#### RQ2 Seamus
+#### RQ2: Altitude, Elevation, and Team Location Exploration
 
 In our initial analysis of altitude, elevation, and location, we find that at least two of these are significant for our research in this data set. Elevation gain and loss, though ideally important for effecting race times, does not have a large amount of this data in this particular set, with about 23,000 for each out of the 187,000 in the original set. On top of that, we can see in the graphs that there is a positive but very weak relationship between the data points. Thus, this information does not seem to reveal much significance for the race times we have been provided.
 
