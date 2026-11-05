@@ -1060,14 +1060,21 @@ One final finding of note comes in the comparison of performance distributions b
 ## Remaining Biweekly Schedule
 
 Completions since proposal:
--  Extensive data cleaning: filtering out duplicate entries, low-entry niche events, unnecessary columns
--  Merged gender columns, date columns
--  Handling missing data in weather and filling in some NAs for `event_type`
--  New columns created to handle available weather data, standardized times
--  Classification of events and weather for ease of analysis
--  Summaries of major variable groups outlined in 3.2; handled by each member according to which variable group pertains most to individual research question
--  Visual exploration of weather data, climate/location data, and race characteristics/stakes data in relation to result times; race stakes exploration faceted by cross country and track individually
--  Initial qualitative analysis/findings
+
+- Extensive data cleaning: filtering out duplicate entries, low-entry niche events, unnecessary columns
+
+- Merged gender columns, date columns
+
+- Handling missing data in weather and filling in some NAs for `event_type`
+
+- New columns created to handle available weather data, standardized times
+
+- Classification of events and weather for ease of analysis
+
+- Summaries of major variable groups outlined in 3.2; handled by each member according to which variable group pertains most to individual research question
+
+- Visual exploration of weather data, climate/location data, and race characteristics/stakes data in relation to result times; race stakes exploration faceted by cross country and track individually
+Initial qualitative analysis/findings
   
 | Week of    | General Task   | Natalie      | Renee    | Seamus  |
 |------------|----------------|--------------|----------|---------|
@@ -1079,7 +1086,7 @@ Completions since proposal:
   
 ## References
 
-Karr, J., Darden, B., Nicholas Pell, & Fryer, R. (2026). National-Running-Club-Database/national_running_club_database_public_datase Full Data Release (Version v2.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20578527
+Karr, J., Darden, B., Nicholas Pell, & Fryer, R. (2026). National-Running-Club-Database/national running club database public dataset Full Data Release (Version v2.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20578527
 
 Karr, J. A., Fryer, R. M., & Chawla, N. V. (2026). Racing to the Starting Line: Measuring Opportunity and Improvement in Cross Country (arXiv:2509.10600). arXiv. https://doi.org/10.48550/arXiv.2509.10600
 
