@@ -779,6 +779,45 @@ Other intervals also showed substantial concentration within individual meets. F
 
 #### RQ2 Seamus
 
+For starters, we had some outliers on standardized time that were over 5 standard deviations away, causing the graphs to look messy and unreadable. We agreed that was too high and they were only 200 or so of those out of the other thousands and thousands of rows. Removed those with more than five standard deviations.
+
+```{r}
+outliers_5 <- only_run %>%
+  filter(abs(standardized_time) > 5) %>%
+  arrange(desc(abs(standardized_time))) %>%
+  select(
+    sport_name,
+    event_name,
+    gender,
+    result_time,
+    time_seconds,
+    standardized_time,
+    altitude, 
+    team_name,
+    meet_name
+  )
+
+outliers_5
+
+nrow(outliers_5)
+
+outliers_5 %>%
+  arrange(desc(time_seconds))
+
+outliers_5 %>%
+  count(sport_name, event_name, gender, sort = TRUE)
+
+outliers_5 %>%
+  arrange(desc(altitude)) %>%
+  select(meet_name, team_name, altitude, standardized_time)
+
+only_run <- only_run %>%
+  filter(
+    is.na(standardized_time) |
+      abs(standardized_time) <= 5
+  )
+```
+
 As we explore the different effects of certain contexts on race, some of the most important are the location and altitude of the race itself. Depending on where certain races are held around the country, runners are likely to find individual differences among them, specifically related to altitude and sometimes elevation. Either way, we want to determine how much altitude and race location themselves are effecting the runner's performances. We determined it'd be best to split altitudes into four categories: Low, Moderate, High, and Very High, in order to more easily visualize the altitude data.
 
 ```{r}
@@ -839,6 +878,34 @@ ggplot(
 ```
 
 We can clearly see in these scatter plots that elevation gain and loss, respectively, have a positive, yet very weak correlation. We can conclude that the two variables attached with standardized scores have some tendency to increase together, but the relationship is not very reliable due to it being very weak in nature. The results from this graph, as well as the lack of amount of elevation gain and loss data in the data set, may likely reasonably lead us to take out elevation from the analysis for runner performance.
+
+We also can investigate the performances of athletes based on the team location. Due to the large number of teams, we start of by looking at the top 15 teams with the most participants and see their results.
+
+```{r}
+team_counts <- only_run %>%
+  group_by(team_name) %>%
+  summarise(
+    total_races = n()
+  )
+
+top_15_teams <- team_counts %>%
+  slice_max(order_by = total_races, n = 15)
+
+top_15_data <- only_run %>%
+  filter(team_name %in% top_15_teams$team_name)
+
+ggplot(top_15_data, aes(x = team_name, y = standardized_time)) +
+  geom_boxplot() +
+  coord_flip() +
+  labs(
+    title = "Athelete Performance Across Team Locations",
+    x = "Team",
+    y = "Standardized Time"
+  ) +
+  theme_minimal()
+```
+
+We see in this box plot graph that most of the schools in the top 15 participation had a median time slightly less than 0. This indicates to us that many of the top schools and their location prepared their athletes well in most cases. Many of these schools are well-known for their athletics, so we can reasonably understand that it makes sense that they're going to be slightly above average in run times. As we go further into analysis, we can determine how potentially the altitudes and locations of these schools themselves allow the runners to be better prepared for certain altitude races around the country based upon that. For example, a east coast state, like Maryland, is going to have significantly lower altitude than a state like Colorado, where it is high. As we dive further into this, we'll be able to understand 
 
 ### RQ3 Natalie
 
@@ -1029,7 +1096,12 @@ Further investigation revealed that several of the most pronounced patterns were
 Overall, our findings provide preliminary evidence that weather conditions may be associated with running performance differently across race distances, but the strength and direction of these relationships remain uncertain. In our final analysis, we plan to investigate these relationships more systematically while accounting for differences between meets and other factors that may influence race times. This will help us determine whether the patterns observed in our exploratory visualizations persist after considering potential confounding variables.
 
 #### RQ2 Seamus
-*insert content here*
+
+In our initial analysis of altitude, elevation, and location, we find that at least two of these are significant for our research in this data set. Elevation gain and loss, though ideally important for effecting race times, does not have a large amount of this data in this particular set, with about 23,000 for each out of the 187,000 in the original set. On top of that, we can see in the graphs that there is a positive but very weak relationship between the data points. Thus, this information does not seem to reveal much significance for the race times we have been provided.
+
+Altitude, however, appears to have more significance to the race times. We see that the runners times for "Low" and "High" altitudes, we find that the runners are slightly above average in their race times, at a median -0.1 and -0.2, respectively. We see that at "Moderate" altitudes that racers run at about average in their race times, with the median reaches 0. Based on the context of training and race locations at a general level, moderate altitude of just over 3000 is slightly above the average altitude in the country, and thus the standardized time at 0 seems reasonable for that altitude level. We also can see that those who ran at a "High" altitude in races had an average standardized score of -0.5, which is significantly above average. The main caveat there is that there not nearly as many locations with that high of an altitude, and so the samples are not as strong as the other three.
+
+When it comes to locations of the athletes' teams, we can initially look at the schools with the top 15 participation in races in the data set. All of the schools had at least a median score of 0 or less, indicating that they're at least average or above average in terms of race times. Future analysis will allow us more in depth breakdown of each team's training locations and how those altitudes might help or hurt them in their preparation for certain different altitudes at different races. Overall, it's very clear that the locations the runners are coming from most certainly do have an effect on how they perform at different races. 
 
 ### RQ3 Natalie
 
