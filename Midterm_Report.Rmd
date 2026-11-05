@@ -643,7 +643,7 @@ To visualize these relationships, weather measurements were grouped into five-de
 We first examined the relationship between temperature and standardized race time across the three distance categories. Because higher standardized values indicate slower performances relative to the event average, an upward trend would suggest an association between warmer temperatures and slower race times. Comparing the three distance categories allows us to explore whether this relationship differs by race length.
 
 
-```{r}
+```{r echo=FALSE}
 temp_summary = weather_run %>%
   mutate(temp_group = floor(temperature / 5) * 5) %>%
   group_by(distance_category, temp_group) %>%
@@ -667,7 +667,7 @@ The relationship between temperature and standardized performance appears to var
 
 Next, we examined whether relative humidity is associated with standardized race times. Higher humidity can influence the body's ability to dissipate heat, potentially affecting performance during prolonged exercise. By comparing the three distance categories, we aim to identify whether longer races exhibit different patterns from shorter events as humidity increases.
 
-```{r}
+```{r echo=FALSE}
 humidity_summary = weather_run %>%
   mutate(humidity_group = floor(humidity / 5) * 5) %>%
   group_by(distance_category, humidity_group) %>%
@@ -692,7 +692,7 @@ The relationship between humidity and standardized race time differs across dist
 Finally, we examined the relationship between wind speed and standardized race time. Unlike temperature and humidity, the influence of wind may depend heavily on its direction relative to the runner, as headwinds and tailwinds can have different effects on performance. Although our analysis uses wind speed rather than runner-relative wind direction, the visualization provides an initial opportunity to examine whether performance patterns vary across race distances as wind speed changes.
 
 
-```{r}
+```{r echo=FALSE}
 wind_summary = weather_run %>%
   mutate(wind_group = floor(wind_speed / 2) * 2) %>%
   group_by(distance_category, wind_group) %>%
@@ -714,42 +714,6 @@ Wind speed shows different patterns across the three distance categories. Long-d
 ##### Investigation of Unusual Weather-Performance Patterns
 
 After examining the three weather-performance visualizations, we investigated selected intervals with unusually high or low average standardized times. Because multiple athletes may compete at the same meet under similar environmental conditions, we examined both the number of individual race results and the number of distinct meets contributing to these intervals. This helps determine whether unusual patterns are supported by multiple competitions or are concentrated within a single meet.
-
-
-```{r}
-weather_intervals = bind_rows(
-  mutate(weather_run, weather = "Temperature",
-         interval = floor(temperature / 5) * 5),
-  mutate(weather_run, weather = "Humidity",
-         interval = floor(humidity / 5) * 5),
-  mutate(weather_run, weather = "Wind Speed",
-         interval = floor(wind_speed / 2) * 2))
-unusual = weather_intervals %>%
-  filter(
-    (weather == "Temperature" & interval == 65 &
-       distance_category %in% c("Short Distance", "Middle Distance")) |
-    (weather == "Humidity" & interval == 30 &
-       distance_category %in% c("Short Distance", "Middle Distance")) |
-    (weather == "Humidity" & interval == 95 &
-       distance_category == "Long Distance") |
-    (weather == "Wind Speed" & interval == 2 &
-       distance_category == "Short Distance") |
-    (weather == "Wind Speed" & interval == 0 &
-       distance_category == "Middle Distance") |
-    (weather == "Wind Speed" & interval == 20 &
-       distance_category == "Long Distance")) %>%
-  group_by(weather, distance_category, interval) %>%
-  summarise(
-    results = n(),
-    meets = n_distinct(meet_id),
-    avg_time = round(mean(standardized_time), 3),
-    largest_share = round(100 * max(table(meet_id)) / n(), 1),
-    .groups = "drop")
-knitr::kable(unusual)
-```
-
-
-
 
 Further investigation revealed that several unusual spikes in our weather-performance visualizations were concentrated within individual meets. Of the eight intervals examined, three contained results from only one meet. Most notably, the middle-distance spikes observed at temperatures of 65–70°F, humidity levels of 30–35%, and wind speeds of 0–2 each contained 46 race results from a single meet, with an identical average standardized time of 1.208. This strongly suggests that the same competition may be responsible for all three unusual patterns rather than three separate weather-related effects.
 
