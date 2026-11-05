@@ -760,7 +760,7 @@ only_run <- only_run %>%
 
 As we explore the different effects of certain contexts on race, some of the most important are the location and altitude of the race itself. Depending on where certain races are held around the country, runners are likely to find individual differences among them, specifically related to altitude and sometimes elevation. Either way, we want to determine how much altitude and race location themselves are effecting the runner's performances. We determined it'd be best to split altitudes into four categories: Low, Moderate, High, and Very High, in order to more easily visualize the altitude data.
 
-```{r}
+```{r echo=FALSE}
 only_run %>%
   mutate(
     altitude_category = case_when(
@@ -776,84 +776,80 @@ only_run %>%
   ggplot(aes(x = altitude_category, y = standardized_time)) + 
   geom_boxplot() + 
   labs( 
-    title = "Athelete Performance Across Race Altitude", 
+    title = "Figure 14: Athlete Performance Across Race Altitude", 
     x = "Race Altitude Category", 
     y = "Standardized Time" 
-  ) +
-  theme_minimal()
+  )
 ```
 
 We can see based off this box plot that the median indicates that moderate level of altitudes find an average standardization score of 0, which is about an average score in this set of race times. For both High and Low altitudes, we can see that the median hovers around -0.1 or -0.2 for both, indicating that runners tend to score slightly above average in those altitudes. For Very High altitudes, we see a median of about -0.5, which is significantly above the average score. Therefore, we can conclude that altitude of the, for the most part, is not super significant for race times aside from those with Very High altitudes.
 
 We also can look at elevation gain and elevation loss. We don't have nearly as much data on this as altitude, but still is good to understand how, if at all, the elevation gain and elevation loss is effecting the runner's performances.
 
-```{r}
+```{r echo=FALSE}
 ggplot(
   only_run %>%
     filter(!is.na(elevation_gain), !is.na(standardized_time)),
   aes(x = elevation_gain, y = standardized_time)
 ) + 
   geom_point(alpha = 0.05) +
-  geom_smooth(method = "lm", color = "yellow") +
+  geom_smooth(method = "lm", color = "red") +
   labs(
-    title = "Standardized Race Performance vs. Elevation Gain",
+    title = "Figure 15: Standardized Race Performance vs. Elevation Gain",
     x = "Race Elevation Gain",
     y = "Standardized Time"
-  ) +
-  theme_minimal()
+  )
 
 ggplot(
   only_run %>%
     filter(!is.na(elevation_loss), !is.na(standardized_time)),
   aes(x = elevation_loss, y = standardized_time)
 ) + 
-  geom_point(alpha = 0.15, color = "blue") +
-  geom_smooth(method = "lm", color = "orange") +
+  geom_point(alpha = 0.15) +
+  geom_smooth(method = "lm", color = "red") +
   labs(
-    title = "Standardized Race Performance vs. Elevation Loss",
+    title = "Figure 16: Standardized Race Performance vs. Elevation Loss",
     x = "Race Elevation Loss",
     y = "Standardized Time"
-  ) +
-  theme_minimal()
+  )
 ```
 
 We can clearly see in these scatter plots that elevation gain and loss, respectively, have a positive, yet very weak correlation. We can conclude that the two variables attached with standardized scores have some tendency to increase together, but the relationship is not very reliable due to it being very weak in nature. The results from this graph, as well as the lack of amount of elevation gain and loss data in the data set, may likely reasonably lead us to take out elevation from the analysis for runner performance.
 
 We also can investigate the performances of athletes based on the team location. Due to the large number of teams, we start of by looking at the top 15 teams with the most participants and see their results.
 
-```{r}
-team_counts <- only_run %>%
+```{r echo=FALSE}
+team_counts = only_run %>%
   group_by(team_name) %>%
   summarise(
     total_races = n()
   )
 
-top_15_teams <- team_counts %>%
+top_15_teams = team_counts %>%
   slice_max(order_by = total_races, n = 15)
 
-top_15_data <- only_run %>%
+top_15_data = only_run %>%
   filter(team_name %in% top_15_teams$team_name)
 
 ggplot(top_15_data, aes(x = team_name, y = standardized_time)) +
   geom_boxplot() +
   coord_flip() +
   labs(
-    title = "Athelete Performance Across Team Locations",
+    title = "Figure 17: Athelete Performance Across Team Locations",
     x = "Team",
     y = "Standardized Time"
-  ) +
-  theme_minimal()
+  )
 ```
 
 We see in this box plot graph that most of the schools in the top 15 participation had a median time slightly less than 0. This indicates to us that many of the top schools and their location prepared their athletes well in most cases. Many of these schools are well-known for their athletics, so we can reasonably understand that it makes sense that they're going to be slightly above average in run times. As we go further into analysis, we can determine how potentially the altitudes and locations of these schools themselves allow the runners to be better prepared for certain altitude races around the country based upon that. For example, a east coast state, like Maryland, is going to have significantly lower altitude than a state like Colorado, where it is high. As we dive further into this, we'll be able to understand 
 
-### RQ3 Natalie
+#### RQ3 Exploring Race Context through Classification and Characteristics
 
 When exploring race context, it is imperative to examine the stakes of the races. Everything from time in the season to the race classification can have a physical and/or mental impact on athletes, ultimately influencing how well they perform. Naturally, the first place to start when analyzing race stakes is the season progression - that is, how the performances of athletes change over the course of the season. The importance of races tends to go up as the season progresses, especially as regular season transitions into championship season.
 
-The first visuals below explore progressions across the season for major events within the sports. These visuals use raw result times since each season occurs across a different span of months. Cross country occurs during the months of August-November, though a majority of meets occur between September and October. Figure _ averages times for each month across all years of data, which spans 2003-2025.
+The first visuals below explore progressions across the season for major events within the sports. These visuals use raw result times since each season occurs across a different span of months. Cross country occurs during the months of August-November, though a majority of meets occur between September and October. Figure 18 averages times for each month across all years of data, which spans 2003-2025.
 
-```{r}
+```{r echo=FALSE}
 xc_monthly = only_run %>%
   filter(
     sport_name == "Cross Country", 
@@ -868,16 +864,16 @@ ggplot(xc_monthly, aes(x = month, y = mean_time, color = gender, group = gender)
   geom_point(size = 2) +
   facet_wrap(~event_name) +
   labs(
-    title = "Figure _: Average Cross Country Performances by Month (2003-2025)",
+    title = "Figure 18: Average Cross Country Performances by Month (2003-2025)",
     x = "Month",
     y = "Average Race Time (Minutes)",
     color = "Gender"
   )
 ```
 
-The same visuals were generated for the sport of track. These visuals display a variety of events spanning a wider range of distances, from short sprints to long distances. Indoor track typically occurs during the months of December-March, and average seasonal progressions across recorded years 2008-2026 are displayed below in Figure _.
+The same visuals were generated for the sport of track. These visuals display a variety of events spanning a wider range of distances, from short sprints to long distances. Indoor track typically occurs during the months of December-March, and average seasonal progressions across recorded years 2008-2026 are displayed below in Figure 19.
 
-```{r}
+```{r echo=FALSE}
 indoor_monthly = only_run %>%
   filter(
     sport_name == "Indoor Track",
@@ -894,16 +890,16 @@ ggplot(indoor_monthly, aes(x = month, y = mean_time, color = gender, group = gen
   geom_point(size = 2) +
   facet_wrap(~event_name, scales = "free_y") +
   labs(
-    title = "Figure _: Average Indoor Track Performances by Month (2008-2026)",
+    title = "Figure 19: Average Indoor Track Performances by Month (2008-2026)",
     x = "Month",
     y = "Average Race Time (Seconds)",
     color = "Gender"
   )
 ```
 
-The same visual was generated in Figure _ for outdoor track. The types of events are slightly different but still span events from short sprints to long distances. Outdoor track typically runs from spring to summer months, which is reflected below.
+The same visual was generated in Figure 20 for outdoor track. The types of events are slightly different but still span events from short sprints to long distances. Outdoor track typically runs from spring to summer months, which is reflected below.
 
-```{r}
+```{r echo=FALSE}
 outdoor_monthly = only_run %>%
   filter(
     sport_name == "Outdoor Track",
@@ -920,16 +916,16 @@ ggplot(outdoor_monthly, aes(x = month, y = mean_time, color = gender, group = ge
   geom_point(size = 2) +
   facet_wrap(~event_name, scales = "free_y") +
   labs(
-    title = "Figure _: Average Outdoor Track Performances by Month (2004-2026)",
+    title = "Figure 20: Average Outdoor Track Performances by Month (2004-2026)",
     x = "Month",
     y = "Average Race Time (Seconds)",
     color = "Gender"
   )
 ```
 
-The next step in exploring potential effects of race stakes is looking at performances across the different race classifications. Figure _ maps out the distributions of performances across the two major events in cross country according to the race classifications of "Regular", "Regionals", and "Nationals". All of these classifications fall under the NIRCA umbrella - that is, all of the represented performances came from club-only meets.
+The next step in exploring potential effects of race stakes is looking at performances across the different race classifications. Figure 21 maps out the distributions of performances across the two major events in cross country according to the race classifications of "Regular", "Regionals", and "Nationals". All of these classifications fall under the NIRCA umbrella - that is, all of the represented performances came from club-only meets.
 
-```{r}
+```{r echo=FALSE}
 xc_stakes = only_run %>%
   mutate(
     stake_category = case_when(
@@ -956,15 +952,15 @@ ggplot(xc_stakes, aes(x = stake_category, y = time_seconds / 60)) +
     scales = "free_y",
     labeller = as_labeller(c("6000m" = "6000m Women", "8000m" = "8000m Men"))) +
   labs(
-    title = "Figure _: Cross Country Performance by Race Stakes",
+    title = "Figure 21: Cross Country Performance by Race Stakes",
     x = "Race Stakes",
     y = "Race Time (Minutes)",
   )
 ```
 
-A similar visualization was developed in Figure _ for track; due to the volume of events, certain events from across the spectrum of distances were chosen to best represent the range of distances in the sport. This includes a short sprint (100m), a long sprint (400m), and a middle distance (1500m). Furthermore, the "regionals" classification does not exist for track, so only performances in regular season vs. championship meets could be compared here.
+A similar visualization was developed in Figure 22 for track; due to the volume of events, certain events from across the spectrum of distances were chosen to best represent the range of distances in the sport. This includes a short sprint (100m), a long sprint (400m), and a middle distance (1500m). Furthermore, the "regionals" classification does not exist for track, so only performances in regular season vs. championship meets could be compared here.
 
-```{r}
+```{r echo=FALSE}
 sprint_stakes = only_run %>%
   mutate(
     stake_category = case_when(
@@ -991,15 +987,15 @@ ggplot(sprint_stakes, aes(x = stake_category, y = time_seconds)) +
     scales = "free_y",
     ) +
   labs(
-    title = "Figure _: Track Performance by Race Stakes",
+    title = "Figure 22: Track Performance by Race Stakes",
     x = "Race Stakes",
     y = "Race Time (Seconds)",
   )
 ```
 
-In exploring race stakes, it is also necessary to compare performance distributions between NIRCA and non-NIRCA races. NIRCA races include club-only amateur collegiate athletes, while non-NIRCA races can be hosted by other governing bodies such as the NCAA. This means that, in non-NIRCA races, amateur athletes may be competing against high-level NCAA athletes. Among the two major races in the sport of cross country, performance distributions are compared between NIRCA and non-NIRCA races in Figure _.
+In exploring race stakes, it is also necessary to compare performance distributions between NIRCA and non-NIRCA races. NIRCA races include club-only amateur collegiate athletes, while non-NIRCA races can be hosted by other governing bodies such as the NCAA. This means that, in non-NIRCA races, amateur athletes may be competing against high-level NCAA athletes. Among the two major races in the sport of cross country, performance distributions are compared between NIRCA and non-NIRCA races in Figure 23.
 
-```{r}
+```{r echo=FALSE}
 xc_nirca = only_run %>%
   mutate(
     competition_type = case_when(
@@ -1018,7 +1014,7 @@ ggplot(xc_nirca, aes(x = competition_type, y = time_seconds / 60)) +
   geom_boxplot() +
   facet_wrap(~event_name, scales = "free_y", labeller = as_labeller(c("6000m" = "6000m Women", "8000m" = "8000m Men"))) +
   labs(
-    title = "Figure _: Cross Country Performance at NIRCA vs. Non-NIRCA Meets",
+    title = "Figure 23: Cross Country Performance at NIRCA vs. Non-NIRCA Meets",
     x = "Competition Type",
     y = "Race Time (Minutes)"
   )
