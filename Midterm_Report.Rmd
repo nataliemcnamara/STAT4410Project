@@ -629,7 +629,6 @@ only_run %>%
 
 ### 3.3 Research Question Exploration
 
-#### RQ1 Renee
 #### RQ1: Weather Conditions and Running Performance
 
 Our first research question examines whether temperature, humidity, and wind speed are associated with differences in running performance across race distances. Using outdoor race results with available weather measurements, we compared average standardized finishing times across short-, middle-, and long-distance events. Because times were standardized within each combination of sport, event, and gender, negative values indicate faster-than-average performances, while positive values indicate slower-than-average performances.
