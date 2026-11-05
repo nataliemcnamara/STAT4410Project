@@ -537,7 +537,9 @@ only_run %>%
     loss_max = max(elevation_loss, na.rm= TRUE)
   )
 ```
+
 Figure 5, below, is showing the distribution of races and the number of observations at each altitude.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = altitude)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
@@ -547,7 +549,9 @@ ggplot(only_run, aes(x = altitude)) +
     y = "Number of Races"
   )
 ```
-The below figure shows us how courses are distributed in terms of their elevation gain. 
+
+The below figure shows us how courses are distributed in terms of their elevation gain.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = elevation_gain)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
@@ -557,7 +561,9 @@ ggplot(only_run, aes(x = elevation_gain)) +
     y = "Number of Races"
   )
 ```
+
 The following figure shows distribution of races that experience elevation loss.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = elevation_loss)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
