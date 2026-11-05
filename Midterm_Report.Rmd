@@ -1131,10 +1131,9 @@ Completions since proposal:
   
 | Week of    | General Task   | Natalie      | Renee    | Seamus  |
 |------------|----------------|--------------|----------|---------|
-|10/26-11/6  |Midterm Report Turn-In|Explanation of trends seen in initial analysis with visuals.|Explain trends seen in performance and types of weather per season.|Explain trends among environmental factors.|
-|11/9-11/20  |Reflection on Midterm Report| Add any additional questions, identify and conduct additional analysis.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct additional analysis as necessary for uncertainty and other items.|
-|11/23-12/4  |Final Edits to Report, Presentation|Develop final visuals, styling the presentation.|Prepare final visuals and consolidate findings.|Complete all visuals and findings for environmental variables.|
-|12/7-12/14  |Final Paper Turn-In |Polishing of explanations for race stake trends.|Final polish and edit.|Final report edit.|
+|11/9-11/20  |Reflection on Midterm Report|Finish event_type exploration, include analysis under race stakes.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct additional analysis as necessary for uncertainty and other items.|
+|11/23-12/4  |Final Edits to Report, Presentation|Develop slides, include more quantitative findings.|Prepare final visuals and consolidate findings.|Complete all visuals and findings for environmental variables.|
+|12/7-12/14  |Final Paper Turn-In |Edit final visuals, polish paper.|Final polish and edit.|Final report edit.|
   
 \newpage 
   
