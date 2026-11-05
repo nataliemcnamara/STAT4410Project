@@ -578,13 +578,15 @@ only_run %>%
 
 ```{r echo=FALSE}
 only_run %>%
-  add_count(meet_state) %>%
+  filter(!is.na(meet_state)) %>%
+  count(meet_state, sort = TRUE) %>%
   filter(n > 500) %>%
-  ggplot(aes(x = meet_state)) + 
-  geom_bar() + 
+  ggplot(aes(x = reorder(meet_state, n), y = n)) + 
+  geom_col() + 
   coord_flip() +
+  scale_y_continuous(labels = scales::label_comma()) +
   labs(
-    title = "Number of Races by State",
+    title = "Figure 8: Number of Races by State",
     x = "State",
     y = "Number of Races"
   )
