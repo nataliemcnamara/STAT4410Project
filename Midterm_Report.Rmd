@@ -171,7 +171,7 @@ only_run %>%
   count(gender)
 ```
 
-### Date Column Merge
+#### Date Column Merge
 
 There are multiple date columns in this dataset; we determined we could merge into one full `date` variable that has all of the start dates in them, since the small range of dates for each meet/race is not going to affect the racers times. We found that the variables `start_date` and `end_date` contained no missing values, while `date_of_event` missing many values. In finding the difference in days of the start date and end date, we find that only ~3% of entries had a different start and end dates, indicating meets occurred on a single day. Thus, we chose the `start_date` column to be the one date column.
 
@@ -291,7 +291,7 @@ dim(only_run)
 
 To facilitate comparisons across different race lengths, we created two additional variables: `distance_m` and `distance_category`. The variable `distance_m` represents event distances in meters, while `distance_category` groups events into short-, middle-, and long-distance races. Events of 400 meters or shorter were classified as short distance, events from 800 through 1500 meters were classified as middle distance, and events longer than 1500 meters were classified as long distance. These classifications allow us to investigate whether the relationships between race conditions and performance differ across race lengths while maintaining a consistent dataset for all three research questions.
 
-```{r}
+```{r include=FALSE}
 only_run = only_run %>%
   mutate(
     distance_m = case_when(
@@ -372,7 +372,7 @@ stakes_summary = only_run %>%
 
 kable(
   stakes_summary,
-  caption = "Table 1: Number of Results in Each Race Stakes Classification"
+  caption = "Number of Results in Each Race Stakes Classification"
 )
 ```
 
@@ -452,7 +452,7 @@ ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender)) +
 
 The track events are much more numerous, so average and median times for the most common events are provided in Tables 2 and 3 below.
 
-```{r echo=FALSE}
+```{r include=FALSE}
 indoor_summary = only_run %>%
   filter(sport_name == "Indoor Track",
          event_name %in% indoor_events) %>%
@@ -462,11 +462,13 @@ indoor_summary = only_run %>%
     median_time = round(median(time_seconds), 2),
   ) %>%
   arrange(mean_time)
-
-kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table 2: Average and Median Times for Indoor Track Events")
 ```
 
 ```{r echo=FALSE}
+kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Average and Median Times for Indoor Track Events")
+```
+
+```{r include=FALSE}
 outdoor_summary = only_run %>%
   filter(sport_name == "Outdoor Track",
          event_name %in% outdoor_events) %>%
@@ -476,7 +478,9 @@ outdoor_summary = only_run %>%
     median_time = round(median(time_seconds), 2), 
   ) %>%
   arrange(mean_time) 
+```
 
+```{r echo=FALSE}
 kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table 3: Average and Median Times for Outdoor Track Events")
 ```
 
@@ -498,10 +502,10 @@ These calculations showed that the outdoor races in our weather-analysis dataset
 To further examine the weather conditions represented in our dataset, we created a histogram showing the distribution of recorded race temperatures. This visualization allows us to identify the most common temperature ranges and evaluate how well unusually hot or cold conditions are represented.
 
 
-```{r}
+```{r echo=FALSE}
 ggplot(weather_run, aes(x = temperature)) +
   geom_histogram(binwidth = 5, fill = "gray", color = "black") +
-  labs(x = "Temperature", y = "Number of Race Results", title = "Figure 4: Distribution of Race Observations Across Temperature Groups")
+  labs(x = "Temperature (°F)", y = "Number of Race Results", title = "Figure 4: Distribution of Race Observations Across Temperature Groups")
 ```
 
 
@@ -532,12 +536,12 @@ only_run %>%
   )
 ```
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = altitude)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
     title = "Figure 5: Distribution of Race Altitude", 
-    x = "Altitude",
+    x = "Altitude (Feet)",
     y = "Number of Races"
   )
 
@@ -545,7 +549,7 @@ ggplot(only_run, aes(x = elevation_gain)) +
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
     title = "Figure 6: Distribution of Elevation Gain", 
-    x = "Elevation Gain",
+    x = "Elevation Gain (Feet)",
     y = "Number of Races"
   )
 
@@ -553,7 +557,7 @@ ggplot(only_run, aes(x = elevation_loss)) +
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
     title = "Figure 7: Distribution of Race Elevation Loss", 
-    x = "Elevation Loss",
+    x = "Elevation Loss (Feet)",
     y = "Number of Races"
   )
 ```
@@ -631,7 +635,7 @@ only_run %>%
 
 ### 3.3 Research Question Exploration
 
-#### RQ1: Weather Conditions and Running Performance
+### RQ1: Weather Conditions and Running Performance
 
 Our first research question examines whether temperature, humidity, and wind speed are associated with differences in running performance across race distances. Using outdoor race results with available weather measurements, we compared average standardized finishing times across short-, middle-, and long-distance events. Because times were standardized within each combination of sport, event, and gender, negative values indicate faster-than-average performances, while positive values indicate slower-than-average performances.
 
@@ -656,7 +660,7 @@ ggplot(temp_summary, aes(x = temp_group, y = avg_time)) +
   geom_line() +
   geom_point() +
   facet_wrap(~distance_category) +
-  labs(x = "Temperature", y = "Average Standardized Race Time", title = "Figure 11: Standardized Race Time by Temperature Group")
+  labs(x = "Temperature (°F)", y = "Average Standardized Race Time", title = "Figure 11: Standardized Race Time by Temperature Group")
 ```
 
 
@@ -703,7 +707,7 @@ ggplot(wind_summary, aes(x = wind_group, y = avg_time)) +
   geom_line() +
   geom_point() +
   facet_wrap(~distance_category) +
-  labs(x = "Wind Speed", y = "Average Standardized Race Time", title = "Figure 13: Standardized Race Time by Wind Speed")
+  labs(x = "Wind Speed (MPH)", y = "Average Standardized Race Time", title = "Figure 13: Standardized Race Time by Wind Speed")
 ```
 
 Wind speed shows different patterns across the three distance categories. Long-distance events exhibit a generally decreasing trend in standardized race times as wind speed increases, suggesting that higher recorded wind speeds are associated with faster relative performances in this sample. However, this pattern is irregular and does not necessarily indicate that wind improves performance. Middle-distance events show unusually high standardized times at very low wind speeds, followed by values closer to zero as wind speed increases. Short-distance events display a similar positive spike at low wind speeds, while most remaining intervals fluctuate around or below zero. Because wind direction relative to runners is not accounted for, and several unusual values occur within specific intervals, these findings should be interpreted cautiously.
@@ -716,7 +720,7 @@ Further investigation revealed that several unusual spikes in our weather-perfor
 
 Other intervals also showed substantial concentration within individual meets. For example, the short-distance wind-speed interval of 2–4 contained 33 results from one meet, while 95.2% of the 580 long-distance results in the 20–22 wind-speed interval came from a single competition. In contrast, the long-distance humidity interval of 95–100% included 585 results across 10 meets, with no individual meet contributing more than 26.2% of observations. These findings demonstrate that the number of race results alone does not necessarily indicate how broadly a pattern is represented across competitions. Because athletes competing at the same meet may share weather conditions and other race characteristics, apparent relationships should be interpreted cautiously, particularly when observations are concentrated within a small number of meets.
 
-#### RQ2: Altitude, Elevation, and Team Location Exploration
+### RQ2: Altitude, Elevation, and Team Location Exploration
 
 For starters, we had some outliers on standardized time that were over 5 standard deviations away, causing the graphs to look messy and unreadable. We agreed that was too high, and there were only ~200 of those out of the other thousands of rows. We removed those with more than five standard deviations.
 
@@ -759,7 +763,7 @@ only_run <- only_run %>%
 
 As we explore the different effects of certain contexts on race, some of the most important are the location and altitude of the race itself. Depending on where certain races are held around the country, runners are likely to find individual differences among them, specifically related to altitude and sometimes elevation. Either way, we want to determine how much altitude and race location themselves are effecting the runner's performances. We determined it'd be best to split altitudes into four categories: Low, Moderate, High, and Very High, in order to more easily visualize the altitude data.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 only_run %>%
   mutate(
     altitude_category = case_when(
@@ -785,7 +789,7 @@ We can see based off this box plot that the median indicates that moderate level
 
 We also can look at elevation gain and elevation loss. We don't have nearly as much data on this as altitude, but still is good to understand how, if at all, the elevation gain and elevation loss is effecting the runner's performances.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(
   only_run %>%
     filter(!is.na(elevation_gain), !is.na(standardized_time)),
@@ -840,15 +844,15 @@ ggplot(top_15_data, aes(x = team_name, y = standardized_time)) +
   )
 ```
 
-We see in this box plot graph that most of the schools in the top 15 participation had a median time slightly less than 0. This indicates to us that many of the top schools and their location prepared their athletes well in most cases. Many of these schools are well-known for their athletics, so we can reasonably understand that it makes sense that they're going to be slightly above average in run times. As we go further into analysis, we can determine how potentially the altitudes and locations of these schools themselves allow the runners to be better prepared for certain altitude races around the country based upon that. For example, a east coast state, like Maryland, is going to have significantly lower altitude than a state like Colorado, where it is high. As we dive further into this, we'll be able to understand 
+We see in this box plot graph that most of the schools in the top 15 participation had a median time slightly less than 0. This indicates to us that many of the top schools and their location prepared their athletes well in most cases. Many of these schools are well-known for their athletics, so we can reasonably understand that it makes sense that they're going to be slightly above average in run times. As we go further into analysis, we can determine how potentially the altitudes and locations of these schools themselves allow the runners to be better prepared for certain altitude races around the country based upon that. For example, a east coast state, like Maryland, is going to have significantly lower altitude than a state like Colorado, where it is high. 
 
-#### RQ3: Exploring Race Context through Classifications and Characteristics
+### RQ3: Exploring Race Context through Classifications and Characteristics
 
 When exploring race context, it is imperative to examine the stakes of the races. Everything from time in the season to the race classification can have a physical and/or mental impact on athletes, ultimately influencing how well they perform. Naturally, the first place to start when analyzing race stakes is the season progression - that is, how the performances of athletes change over the course of the season. The importance of races tends to go up as the season progresses, especially as regular season transitions into championship season.
 
 The first visuals below explore progressions across the season for major events within the sports. These visuals use raw result times since each season occurs across a different span of months. Cross country occurs during the months of August-November, though a majority of meets occur between September and October. Figure 18 averages times for each month across all years of data, which spans 2003-2025.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 xc_monthly = only_run %>%
   filter(
     sport_name == "Cross Country", 
@@ -872,7 +876,7 @@ ggplot(xc_monthly, aes(x = month, y = mean_time, color = gender, group = gender)
 
 The same visuals were generated for the sport of track. These visuals display a variety of events spanning a wider range of distances, from short sprints to long distances. Indoor track typically occurs during the months of December-March, and average seasonal progressions across recorded years 2008-2026 are displayed below in Figure 19.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 indoor_monthly = only_run %>%
   filter(
     sport_name == "Indoor Track",
@@ -898,7 +902,7 @@ ggplot(indoor_monthly, aes(x = month, y = mean_time, color = gender, group = gen
 
 The same visual was generated in Figure 20 for outdoor track. The types of events are slightly different but still span events from short sprints to long distances. Outdoor track typically runs from spring to summer months, which is reflected below.
 
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 outdoor_monthly = only_run %>%
   filter(
     sport_name == "Outdoor Track",
@@ -1023,7 +1027,7 @@ ggplot(xc_nirca, aes(x = competition_type, y = time_seconds / 60)) +
 
 ### 3.4 Qualitative Analysis
 
-#### RQ1: Weather Conditions and Running Performance
+### RQ1: Weather Conditions and Running Performance
 
 Our preliminary analysis suggests that the relationships between weather conditions and running performance may differ across race distances, although no consistent pattern emerged across all three weather variables. Long-distance events generally showed higher standardized race times at warmer temperatures, suggesting an association between increasing temperature and slower relative performance. However, short-distance results fluctuated without a clear temperature-related trend, while middle-distance events exhibited several unusually large spikes. Humidity and wind speed also showed varying relationships across distance categories, but neither demonstrated a consistent association with slower performance as conditions increased.
 
@@ -1031,7 +1035,7 @@ Further investigation revealed that several of the most pronounced patterns were
 
 Overall, our findings provide preliminary evidence that weather conditions may be associated with running performance differently across race distances, but the strength and direction of these relationships remain uncertain. In our final analysis, we plan to investigate these relationships more systematically while accounting for differences between meets and other factors that may influence race times. This will help us determine whether the patterns observed in our exploratory visualizations persist after considering potential confounding variables.
 
-#### RQ2: Altitude, Elevation, and Team Location Exploration
+### RQ2: Altitude, Elevation, and Team Location Exploration
 
 In our initial analysis of altitude, elevation, and location, we find that at least two of these are significant for our research in this data set. Elevation gain and loss, though ideally important for effecting race times, does not have a large amount of this data in this particular set, with about 23,000 for each out of the 187,000 in the original set. On top of that, we can see in the graphs that there is a positive but very weak relationship between the data points. Thus, this information does not seem to reveal much significance for the race times we have been provided.
 
@@ -1056,14 +1060,14 @@ One final finding of note comes in the comparison of performance distributions b
 ## Remaining Biweekly Schedule
 
 Completions since proposal:
-- Extensive data cleaning: filtering out duplicate entries, low-entry niche events, unnecessary columns
-- Merged gender columns, date columns
-- Handling missing data in weather and filling in some NAs for `event_type`
-- New columns created to handle available weather data, standardized times
-- Classification of events and weather for ease of analysis
-- Summaries of major variable groups outlined in 3.2; handled by each member according to which variable group pertains most to individual research question
-- Visual exploration of weather data, climate/location data, and race characteristics/stakes data in relation to result times; race stakes exploration faceted by cross country and track individually
-- Initial qualitative analysis/findings
+-  Extensive data cleaning: filtering out duplicate entries, low-entry niche events, unnecessary columns
+-  Merged gender columns, date columns
+-  Handling missing data in weather and filling in some NAs for `event_type`
+-  New columns created to handle available weather data, standardized times
+-  Classification of events and weather for ease of analysis
+-  Summaries of major variable groups outlined in 3.2; handled by each member according to which variable group pertains most to individual research question
+-  Visual exploration of weather data, climate/location data, and race characteristics/stakes data in relation to result times; race stakes exploration faceted by cross country and track individually
+-  Initial qualitative analysis/findings
   
 | Week of    | General Task   | Natalie      | Renee    | Seamus  |
 |------------|----------------|--------------|----------|---------|
