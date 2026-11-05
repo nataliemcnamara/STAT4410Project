@@ -1111,20 +1111,29 @@ Figures "", "", and "" display performance progressions across the seasons of ea
 
 Outdoor track events show declines in times across the board – this indicates that athletes generally continue to improve as the outdoor season progresses, regardless of race distance. This trend may reflect both the cumulative effects of training throughout the academic year as well as the gradual increase in meet importance. The smaller, more controlled environment of an indoor track race may also explain the relative lack of improvement in indoor track. These patterns suggest that the relationship between time of season and athletic performance varies between running sports and even between events within the same sport. While late-season races generally appear to produce faster results in cross country and outdoor track, indoor track demonstrates a more complicated relationship, particularly among shorter-distance events.
 
-When comparing performances across race classifications in both Figures "" and "", there are visible declines in the average times and distribution centers from regular season races to national races. There is a clear correlation between faster times and heightened race stakes - championship performances not only tend to have faster times, but the distributions are more compact with less outliers, indicating the athletes are attempting to run their best at some of the most important meets of the year.
+When comparing performances across race classifications in both Figures "" and "", there are visible declines in the average times and distribution centers from regular season races to national races. There is a clear correlation between faster times and heightened race stakes - championship performances not only tend to have faster times, but the distributions are more compact with less outliers, indicating the athletes are attempting to run their best at some of the most important meets of the year. The mental effect of knowing it is a championship race may play a part in this clear showing of stronger performances, though cumulative training over time must again be accounted for when determining why performances are strong.
 
-One final interesting finding comes when comparing performance distributions between NIRCA and non-NIRCA races. Non-NIRCA races have lower average times and much more compact distributions compared to NIRCA races.
+One final finding of note comes in the comparison of performance distributions between NIRCA and non-NIRCA races. Non-NIRCA races have lower average times and much more compact distributions compared to NIRCA races. Non-NIRCA races are often hosted by NCAA schools - amateur club athletes can compete in these races if no NIRCA race is available and nearby for them to participate in. Thus, it is possible to conclude that the presence of high-caliber athletes may push the club athletes represented in this dataset to perform better, potentially explaining the visibly lower, compact distributions in comparison with NIRCA-only races.
 
 \newpage
 
-## Remaining Biweekly Schedule  
+## Remaining Biweekly Schedule
+
+Completions since proposal:
+- Extensive data cleaning: filtering out duplicate entries, low-entry niche events, unnecessary columns
+- Merged gender columns, date columns
+- Handling missing data in weather and filling in some NAs for `event_type`
+- New columns created to handle available weather data, standardized times
+- Classification of events and weather for ease of analysis
+- Summaries of major variable groups outlined in 3.2; handled by each member according to which variable group pertains most to individual research question
+- Visual exploration of weather data, climate/location data, and race characteristics/stakes data in relation to result times; race stakes exploration faceted by cross country and track individually
+- Initial qualitative analysis/findings
   
 | Week of    | General Task   | Natalie      | Renee    | Seamus  |
 |------------|----------------|--------------|----------|---------|
-|10/26-11/6  |Midterm Report Turn-In|Explanation of trends seen in initial analysis with visuals.|Explain trends seen in performance and types of weather per season.|Explain trends among environmental factors.|
-|11/9-11/20  |Reflection on Midterm Report| Add any additional questions, identify and conduct additional analysis.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct additional analysis as necessary for uncertainty and other items.|
-|11/23-12/4  |Final Edits to Report, Presentation|Develop final visuals, styling the presentation.|Prepare final visuals and consolidate findings.|Complete all visuals and findings for environmental variables.|
-|12/7-12/14  |Final Paper Turn-In |Polishing of explanations for race stake trends.|Final polish and edit.|Final report edit.|  
+|11/9-11/20  |Reflection on Midterm Report|Finish event_type exploration, include analysis under race stakes.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct additional analysis as necessary for uncertainty and other items.|
+|11/23-12/4  |Final Edits to Report, Presentation|Develop slides, include more quantitative findings.|Prepare final visuals and consolidate findings.|Complete all visuals and findings for environmental variables.|
+|12/7-12/14  |Final Paper Turn-In |Edit final visuals, polish paper.|Final polish and edit.|Final report edit.|  
   
 \newpage 
   
