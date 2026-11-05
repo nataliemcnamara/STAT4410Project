@@ -1024,7 +1024,8 @@ ggplot(xc_nirca, aes(x = competition_type, y = time_seconds / 60)) +
 
 ### 3.4 Qualitative Analysis
 
-#### RQ1 Renee
+#### RQ1: Weather Conditions and Running Performance
+
 Our preliminary analysis suggests that the relationships between weather conditions and running performance may differ across race distances, although no consistent pattern emerged across all three weather variables. Long-distance events generally showed higher standardized race times at warmer temperatures, suggesting an association between increasing temperature and slower relative performance. However, short-distance results fluctuated without a clear temperature-related trend, while middle-distance events exhibited several unusually large spikes. Humidity and wind speed also showed varying relationships across distance categories, but neither demonstrated a consistent association with slower performance as conditions increased.
 
 Further investigation revealed that several of the most pronounced patterns were heavily influenced by individual meets. In particular, the middle-distance spikes for temperature, humidity, and wind speed each contained 46 race results from a single meet, with an identical average standardized time of 1.208. Additionally, 95.2% of the 580 long-distance results in the 20–22 wind-speed interval came from one meet. These findings suggest that some apparent weather-related patterns may reflect characteristics of specific competitions rather than broader relationships between weather and performance.
