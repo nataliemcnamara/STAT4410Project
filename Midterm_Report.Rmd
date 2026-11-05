@@ -494,7 +494,7 @@ weather_summary = data.frame(
 )
 ```
 
-This information shows that the outdoor races in our weather-analysis dataset occurred under a wide range of environmental conditions. The average temperature was 57.85°F, with recorded temperatures ranging from 30.15°F to 93.61°F. Relative humidity averaged 63.55%, ranging from 24% to 100%, while wind speed averaged 8.59, with values ranging from 0 to 23.02. These differences indicate that our dataset includes a variety of weather conditions, providing an opportunity to investigate how temperature, humidity, and wind speed relate to running performance across different race distances.
+These calculations showed that the outdoor races in our weather-analysis dataset occurred under a wide range of environmental conditions. The average temperature was 57.85°F, with recorded temperatures ranging from 30.15°F to 93.61°F. Relative humidity averaged 63.55%, ranging from 24% to 100%, while wind speed averaged 8.59, with values ranging from 0 to 23.02. These differences indicate that our dataset includes a variety of weather conditions, providing an opportunity to investigate how temperature, humidity, and wind speed relate to running performance across different race distances.
 
 To further examine the weather conditions represented in our dataset, we created a histogram showing the distribution of recorded race temperatures. This visualization allows us to identify the most common temperature ranges and evaluate how well unusually hot or cold conditions are represented.
 
