@@ -1131,9 +1131,9 @@ Completions since proposal:
   
 | Week of    | General Task   | Natalie      | Renee    | Seamus  |
 |------------|----------------|--------------|----------|---------|
-|11/9-11/20  |Reflection on Midterm Report|Finish event_type exploration, include analysis under race stakes.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct additional analysis as necessary for uncertainty and other items.|
-|11/23-12/4  |Final Edits to Report, Presentation|Develop slides, include more quantitative findings.|Prepare final visuals and consolidate findings.|Complete all visuals and findings for environmental variables.|
-|12/7-12/14  |Final Paper Turn-In |Edit final visuals, polish paper.|Final polish and edit.|Final report edit.|
+|11/9-11/20  |Reflection on Midterm Report|Finish event_type exploration, include analysis under race stakes.|Categorize findings. Note any other additional uncertainties or unmeasured variables.|Conduct further analysis on altitude significance, team location significance, and race location significance.|
+|11/23-12/4  |Final Edits to Report, Presentation|Develop slides, include more quantitative findings.|Prepare final visuals and consolidate findings.|Develop and complete all visuals for explanation, and prepare for presentation.|
+|12/7-12/14  |Final Paper Turn-In |Edit final visuals, polish paper.|Final polish and edit.|Complete final edits and explanations for trends in altitude and race/team locations.|
   
 \newpage 
   
