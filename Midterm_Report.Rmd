@@ -1075,7 +1075,7 @@ Completions since proposal:
   
 ## References
 
-Karr, J., Darden, B., Nicholas Pell, & Fryer, R. (2026). National-Running-Club-Database/national_running_club_database_public_dataset: Full Data Release (Version v2.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20578527
+Karr, J., Darden, B., Nicholas Pell, & Fryer, R. (2026). National-Running-Club-Database/national_running_club_database_public_datase Full Data Release (Version v2.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.20578527
 
 Karr, J. A., Fryer, R. M., & Chawla, N. V. (2026). Racing to the Starting Line: Measuring Opportunity and Improvement in Cross Country (arXiv:2509.10600). arXiv. https://doi.org/10.48550/arXiv.2509.10600
 
