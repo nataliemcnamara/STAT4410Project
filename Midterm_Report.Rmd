@@ -450,7 +450,7 @@ ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender)) +
 
 ```
 
-The track events are much more numerous, so average and median times for the most common events are provided in Tables 2 and 3 below.
+The track events are much more numerous; average mean and median times for indoor track are shown in Table 2 below.
 
 ```{r include=FALSE}
 indoor_summary = only_run %>%
@@ -468,6 +468,8 @@ indoor_summary = only_run %>%
 kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Average and Median Times for Indoor Track Events")
 ```
 
+The same summary is given for outdoor track, with average mean and median times shown below in Table 3.
+
 ```{r include=FALSE}
 outdoor_summary = only_run %>%
   filter(sport_name == "Outdoor Track",
@@ -481,7 +483,7 @@ outdoor_summary = only_run %>%
 ```
 
 ```{r echo=FALSE}
-kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table 3: Average and Median Times for Outdoor Track Events")
+kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Average and Median Times for Outdoor Track Events")
 ```
 
 To better understand the environmental conditions represented in our dataset, we examined the distributions of temperature, humidity, and wind speed. These variables were selected because they have relatively complete data compared to other weather measurements. The following summaries use outdoor running results with recorded weather measurements, allowing us to describe the conditions under which athletes competed. We calculated descriptive statistics and examined the distribution of temperatures to identify typical race conditions and the extent to which extreme weather is represented.
@@ -535,7 +537,7 @@ only_run %>%
     loss_max = max(elevation_loss, na.rm= TRUE)
   )
 ```
-
+Figure 5, below, is showing the distribution of races and the number of observations at each altitude.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = altitude)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
@@ -544,7 +546,9 @@ ggplot(only_run, aes(x = altitude)) +
     x = "Altitude (Feet)",
     y = "Number of Races"
   )
-
+```
+The below figure shows us how courses are distributed in terms of their elevation gain. 
+```{r}
 ggplot(only_run, aes(x = elevation_gain)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
@@ -552,7 +556,9 @@ ggplot(only_run, aes(x = elevation_gain)) +
     x = "Elevation Gain (Feet)",
     y = "Number of Races"
   )
-
+```
+The following figure shows distribution of races that experience elevation loss.
+```{r}
 ggplot(only_run, aes(x = elevation_loss)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
