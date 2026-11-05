@@ -548,7 +548,7 @@ ggplot(only_run, aes(x = altitude)) +
   )
 ```
 The below figure shows us how courses are distributed in terms of their elevation gain. 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = elevation_gain)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
@@ -558,7 +558,7 @@ ggplot(only_run, aes(x = elevation_gain)) +
   )
 ```
 The following figure shows distribution of races that experience elevation loss.
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(only_run, aes(x = elevation_loss)) + 
   geom_histogram(bins = 30, fill = "gray", color = "black") +
   labs(
@@ -605,7 +605,7 @@ only_run %>%
   count(gender) %>% 
   mutate(percent = n / sum(n) * 100)
 ```
-```{r echo=FALSE, fig.height=3, fig.width=5}
+```{r echo=FALSE, fig.height=3}
 ggplot(only_run, aes(x = gender)) + 
   geom_bar(width = 0.5) + 
   labs(
