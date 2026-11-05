@@ -151,15 +151,14 @@ only_run %>%
     total_results = n(),
     weather_results = sum(weather_true),
     weather_percent = round(mean(weather_true) * 100, 2)
-  ) %>%
-  knitr::kable()
+  )
 ```
 
 #### Gender Column Merge
 
 For gender, we have two separate columns, `gender` which only was filled about half of the entries, and `gender_1` which was full. First, compared the entries of the two columns to ensure that none of them were different. This first `all` returns TRUE which tells us we do not have differences in rows where both columns are filled. Thus, we can combine them into one `gender` column for future analysis. 
 
-```{r}
+```{r include=FALSE}
 all(only_run$gender[!is.na(only_run$gender) & is.na(only_run$gender_1)] ==
     only_run$gender_1[!is.na(only_run$gender) & is.na(only_run$gender_1)])
 
@@ -176,7 +175,7 @@ only_run %>%
 
 There are multiple date columns in this dataset; we determined we could merge into one full `date` variable that has all of the start dates in them, since the small range of dates for each meet/race is not going to affect the racers times. We found that the variables `start_date` and `end_date` contained no missing values, while `date_of_event` missing many values. In finding the difference in days of the start date and end date, we find that only ~3% of entries had a different start and end dates, indicating meets occurred on a single day. Thus, we chose the `start_date` column to be the one date column.
 
-```{r}
+```{r include=FALSE}
 only_run = only_run %>%
   mutate(start_date = ymd(start_date), end_date   = ymd(end_date))
 
@@ -195,7 +194,7 @@ only_run = only_run %>%
 
 Race finishing times were originally stored as character values in different formats depending on event length. Shorter races were typically recorded in seconds, while longer races were recorded in minutes or hours. To ensure consistency across events, we added a column converting result times into seconds. This transformation allows us to perform numerical calculations and compare results across different race distances. The original finishing times were preserved, while a new variable, `time_seconds`, was created to store the converted numerical values. This conversion also provides the foundation for standardizing performance across different events.
 
-```{r}
+```{r include=FALSE}
 only_run = only_run %>%
   mutate(
     time_add = case_when(
@@ -205,26 +204,14 @@ only_run = only_run %>%
     time_seconds = as.numeric(hms(time_add))
   ) %>%
   select(-time_add)
-
-class(only_run$time_seconds)
-head(only_run$time_seconds)
 ```
 
 Because raw finishing times cannot be directly compared across different race distances, we standardized finishing times within each combination of sport, event, and gender. This accounts for differences in typical finishing times between race types and between men's and women's competitions. Standardized times represent how far an individual result falls above or below the average finishing time for comparable performances, measured in standard deviations. Negative standardized values indicate faster-than-average performances, while positive values indicate slower-than-average performances. This transformation allows us to compare relative performance across different events using a common scale.
 
-```{r}
+```{r include=FALSE}
 only_run = only_run %>%
   group_by(sport_name, event_name, gender) %>%
-  mutate(
-    standardized_time = if (
-      sum(!is.na(time_seconds)) > 1 &&
-      sd(time_seconds, na.rm = TRUE) > 0
-    ) {
-      as.numeric(scale(time_seconds))
-    } else {
-      NA_real_
-    }
-  ) %>%
+  mutate(standardized_time = as.vector(scale(time_seconds))) %>%
   ungroup()
 ```
 
@@ -235,7 +222,7 @@ The variable `event_type` could be very valuable for the stated goal of RQ3 in t
 
 We were also able to fill in some missing values based on existing knowledge of the sport. For instance, all cross country races are one-time races (no prelims and finals), and it is reasonable to assume that the races not marked as a "regional" or "national" are simply regular season races. Thus, these entries were filled in as "Regular Season". Track entries with missing event types were left alone as it is much more difficult to simply guess those event types. Again, it is not in the best interest of our analysis to omit entries with missing values for this variable as they still contain valid, important information elsewhere. 27 unique event types remained after this step.
 
-```{r}
+```{r include=FALSE}
 # Investigate messy event_type variable
 # only_run %>%
   # count(event_type, sort = TRUE)
@@ -261,15 +248,13 @@ only_run = only_run %>%
   ))
 
 length(unique(only_run$event_type))
-# only_run %>%
-  # count(event_type, sort = TRUE)
 ```
 
 For the variable `event_name`, there are a number of non-standard running events that have minimal numbers of entries. For instance, 7000m is a non-standard cross country distance with only two recorded entries in the dataset. It was defined, based our existing knowledge of the running sports in this dataset, that a "niche" event was one with 200 or less observations. For cleanest data and to compare performances across standardized times, we filtered these out.
 
 Prior to filtering, the dataset contained 33 unique race events. After removing non-standard and niche events with fewer than 200 total entries, 19 unique events remain with a relatively small amount of data loss (~1000 entries).
 
-```{r}
+```{r include=FALSE}
 # Investigate niche events
 event_summary = only_run %>%
   count(sport_name, event_name, name = "count") %>%
@@ -277,8 +262,7 @@ event_summary = only_run %>%
   arrange(count)
 
 event_summary
-```
-```{r}
+
 # Filter out low-entry events
 only_run = only_run %>%
   mutate(event_name = as.character(event_name)) %>% 
@@ -292,7 +276,7 @@ dim(only_run)
 
 After creating the column `time_seconds` as a conversion of `result_time`, it was realized that some result times may have been entered incorrectly due to being extremely low for the event. The sport and event areas where these occurred were examined, and 29 seemingly incorrect entries were cleaned out using the world record times as a threshold.
 
-```{r}
+```{r include=FALSE}
 only_run = only_run %>%
   filter(
     !(sport_name == "Cross Country" & event_name == "8000m" &
@@ -318,20 +302,19 @@ only_run = only_run %>%
       event_name == "Mile" ~ 1609.344,
       str_detect(event_name, "^\\d+m$") ~
         as.numeric(str_remove(event_name, "m$")),
-      TRUE ~ NA_real_),
+       ),
     distance_category = case_when(
       distance_m <= 400 ~ "Short Distance",
       distance_m <= 1500 ~ "Middle Distance",
       distance_m > 1500 ~ "Long Distance",
-      TRUE ~ NA_character_))
+      ))
 ```
 
-
-#### Additional Variable Classification
+#### Weather Variable Classifications
 
 To facilitate comparisons across different race conditions, we created categorical variables for temperature, humidity, and race stakes. Temperature measurements were grouped into cold, cool, mild, and hot conditions, while humidity was classified as low, moderate, or high. These categories simplify the interpretation of weather conditions while preserving the original numerical measurements for more detailed analysis. We also created a race classification variable using the existing national, regional, and NIRCA-only indicators. This allows us to compare performances across different levels of competition. All new variables were added to the shared cleaned dataset so they could be used consistently across the three research questions.
 
-```{r}
+```{r include=FALSE}
 only_run = only_run %>%
   mutate(
     temperature_category = case_when(
@@ -339,18 +322,18 @@ only_run = only_run %>%
       temperature < 60 ~ "Cool",
       temperature < 75 ~ "Mild",
       temperature >= 75 ~ "Hot",
-      TRUE ~ NA_character_),
+      ),
     humidity_category = case_when(
       humidity < 40 ~ "Low",
       humidity < 70 ~ "Moderate",
       humidity >= 70 ~ "High",
-      TRUE ~ NA_character_))
+      ))
 only_run %>% count(temperature_category)
 only_run %>% count(humidity_category)
 
 ```
 
-```{r}
+```{r include=FALSE}
 weather_run = only_run %>%
   filter(
     sport_name %in% c("Cross Country", "Outdoor Track"),
@@ -365,6 +348,8 @@ weather_run %>%
     results = n(),
     meets = n_distinct(meet_id))
 ```
+
+
 
 ### 3.2 Data Summary
 
