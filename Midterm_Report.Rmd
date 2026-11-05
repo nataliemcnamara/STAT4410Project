@@ -357,9 +357,9 @@ The numerous variables in the NRCD dataset can be grouped based on shared charac
 
 "Race Stakes" variables, are variables that define the context of a meet. This could be classifying the race as club-only (`nirca_only`), regionals (`regionals`), or nationals (`nationals`), which are typically end-of-season championship meets. Furthermore, the variable `event_type` breaks it down with even further context, especially for track events when there may be preliminary and final rounds. The variables `nirca_only`, `regionals`, and `nationals` are each logical/Boolean vectors denoting the race classification.
 
-Table _ below displays the counts of entries under each classification and the total percent that each make up in the larger dataset. This table is designed to show the overlap that occurs between classifications - for instance, all regional and national meets are also classified as NIRCA (club) running meets only. There are some NIRCA-only regular season meets as well as meets that fall outside the NIRCA designation (could be NCAA, road races, etc.)
+Table 1 below displays the counts of entries under each classification and the total percent that each make up in the larger dataset. This table is designed to show the overlap that occurs between classifications - for instance, all regional and national meets are also classified as NIRCA (club) running meets only. There are some NIRCA-only regular season meets as well as meets that fall outside the NIRCA designation (could be NCAA, road races, etc.)
 
-```{r}
+```{r echo=FALSE}
 only_run = only_run %>%
   mutate(
     regionals = as.logical(regionals),
@@ -377,9 +377,9 @@ kable(
 )
 ```
 
-Table _ above reveals there are four combinations of race classification: NIRCA-only (regular season), NIRCA regionals, NIRCA nationals, and non-NIRCA (races not governed by NIRCA, which can include NCAA and other road races). To best visualize this, Figure _ below shows the proportion of race entries categorized by each meet stakes combination. Regular season NIRCA competitions account for the largest share of entries, followed by NIRCA Nationals, non-NIRCA open meets, and NIRCA Regionals.
+Table 1 above reveals there are four combinations of race classification: NIRCA-only (regular season), NIRCA regionals, NIRCA nationals, and non-NIRCA (races not governed by NIRCA, which can include NCAA and other road races). To best visualize this, Figure 1 below shows the proportion of race entries categorized by each meet stakes combination. Regular season NIRCA competitions account for the largest share of entries, followed by NIRCA Nationals, non-NIRCA open meets, and NIRCA Regionals.
 
-```{r}
+```{r echo=FALSE}
 stakes_summary_class = stakes_summary %>%
   mutate(
     stake_category = case_when(
@@ -401,9 +401,9 @@ ggplot(stakes_summary_class, aes(x = reorder(stake_category, percentage), y = pe
 ```
 
 For the "Sports and Events" variables, `sport_name` shows four unique running sports represented in the dataset: Outdoor Track, Indoor Track, Cross Country, and Road Race. Each of these sports are assigned a number from 1-4 according to the `sport_id` variable. From these sports, each contain a collection of events that can be run in said sport given by the `event_name` variable. There are _ unique events, each also associated with a number in the `event_id` variable. Some of these events can be ran in the different sports: for instance, the 800m can be ran both inside and outside on a track. 
-Each sport has a unique number of events - cross country and road races have much less variety in race distances compared to track. Due to this and the large number of events particularly in track, vectors of the most common events for each sport were defined for upcoming summaries. The criteria for "most common" was defined as follows: events in cross country, indoor track, or outdoor had to have at least 1000 observations, while events in road races had to have at least 250 observations. These suitably encompassed the major race distances in each sport to provide the strongest summary.Figure _ below shows this exact distribution of most common events by running sport.
+Each sport has a unique number of events - cross country and road races have much less variety in race distances compared to track. Due to this and the large number of events particularly in track, vectors of the most common events for each sport were defined for upcoming summaries. The criteria for "most common" was defined as follows: events in cross country, indoor track, or outdoor had to have at least 1000 observations, while events in road races had to have at least 250 observations. These suitably encompassed the major race distances in each sport to provide the strongest summary. Figure 2 below shows this exact distribution of most common events by running sport.
 
-```{r}
+```{r include=FALSE}
 xc_events = c("8000m", "6000m", "5000m")
 
 indoor_events = c("60m", "200m", "400m", "800m", "Mile", "3000m")
@@ -411,7 +411,7 @@ indoor_events = c("60m", "200m", "400m", "800m", "Mile", "3000m")
 outdoor_events = c("100m", "200m", "400m", "800m", "1500m", "5000m")
 ```
 
-```{r}
+```{r echo=FALSE}
 event_summary = only_run %>%
   count(sport_name, event_name, name = "count") %>%
   filter(
@@ -433,9 +433,9 @@ ggplot(event_summary, aes(x = count, y = reorder_within(event_name, count, sport
 
 Crucial to our analysis are the time performances of the athletes. The variable `result_time` gives us these times, and they were converted into the lowest unit `time_seconds` for ease of comparison during the cleaning process. Result times are most directly associated with the event being ran and gender. Due to the differences in variety of events per sport, custom summaries per sport are given below.
 
-Figure _ displays distribution of cross country times across the 8000m, 6000m, and 5000m distances. Men typically only run the 8000m, while there is data for both men and women in the 6000m and 5000m.
+Figure 3 displays distribution of cross country times across the 8000m, 6000m, and 5000m distances. Men typically only run the 8000m, while there is data for both men and women in the 6000m and 5000m.
 
-```{r}
+```{r echo=FALSE}
 xc = only_run %>%
   filter(sport_name == "Cross Country", event_name %in% xc_events) %>%
   mutate(time_minutes = time_seconds / 60)
@@ -451,9 +451,9 @@ ggplot(xc, aes(x = time_minutes, y = event_name, fill = gender)) +
 
 ```
 
-The track events are much more numerous, so average and median times for the most common events are provided in Tables _ and _ below.
+The track events are much more numerous, so average and median times for the most common events are provided in Tables 2 and 3 below.
 
-```{r}
+```{r echo=FALSE}
 indoor_summary = only_run %>%
   filter(sport_name == "Indoor Track",
          event_name %in% indoor_events) %>%
@@ -467,7 +467,7 @@ indoor_summary = only_run %>%
 kable(indoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table _: Average and Median Times for Indoor Track Events")
 ```
 
-```{r}
+```{r echo=FALSE}
 outdoor_summary = only_run %>%
   filter(sport_name == "Outdoor Track",
          event_name %in% outdoor_events) %>%
@@ -481,9 +481,7 @@ outdoor_summary = only_run %>%
 kable(outdoor_summary, col.names = c("Event", "Gender", "Mean Time (Seconds)", "Median Time (Seconds)"), caption = "Table _: Average and Median Times for Outdoor Track Events")
 ```
 
-
 To better understand the environmental conditions represented in our dataset, we examined the distributions of temperature, humidity, and wind speed. These variables were selected because they have relatively complete data compared to other weather measurements. The following summaries use outdoor running results with recorded weather measurements, allowing us to describe the conditions under which athletes competed. We calculated descriptive statistics and examined the distribution of temperatures to identify typical race conditions and the extent to which extreme weather is represented.
-
 
 ```{r}
 weather_summary = data.frame(
