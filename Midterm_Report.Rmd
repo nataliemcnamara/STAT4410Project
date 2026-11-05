@@ -632,7 +632,6 @@ only_run %>%
 
 ### 3.3 Research Question Exploration
 
-#### RQ1 Renee
 #### RQ1: Weather Conditions and Running Performance
 
 Our first research question examines whether temperature, humidity, and wind speed are associated with differences in running performance across race distances. Using outdoor race results with available weather measurements, we compared average standardized finishing times across short-, middle-, and long-distance events. Because times were standardized within each combination of sport, event, and gender, negative values indicate faster-than-average performances, while positive values indicate slower-than-average performances.
@@ -658,7 +657,7 @@ ggplot(temp_summary, aes(x = temp_group, y = avg_time)) +
   geom_line() +
   geom_point() +
   facet_wrap(~distance_category) +
-  labs(x = "Temperature", y = "Average Standardized Race Time")
+  labs(x = "Temperature", y = "Average Standardized Race Time", title = "Figure 11: Standardized Race Time by Temperature Group")
 ```
 
 
@@ -682,16 +681,14 @@ ggplot(humidity_summary, aes(x = humidity_group, y = avg_time)) +
   geom_line() +
   geom_point() +
   facet_wrap(~distance_category) +
-  labs(x = "Relative Humidity (%)", y = "Average Standardized Race Time")
+  labs(x = "Relative Humidity (%)", y = "Average Standardized Race Time", title = "Figure 12: Standardized Race Time by Relative Humidity")
 ```
-
 
 The relationship between humidity and standardized race time differs across distance categories. Long-distance performances remain relatively close to the event average across most humidity intervals, with somewhat higher standardized times at the highest humidity levels. Middle-distance results show a pronounced positive spike near 32.5% humidity, followed by substantially lower standardized times at higher humidity levels. Short-distance results also exhibit an unusually high average standardized time near 32.5% humidity, while most other intervals remain close to or below zero. These patterns do not suggest a consistent relationship between increasing humidity and slower performance, but they identify several unusual intervals that may be influenced by individual meets.
 
 ##### Wind Speed and Running Performance
 
 Finally, we examined the relationship between wind speed and standardized race time. Unlike temperature and humidity, the influence of wind may depend heavily on its direction relative to the runner, as headwinds and tailwinds can have different effects on performance. Although our analysis uses wind speed rather than runner-relative wind direction, the visualization provides an initial opportunity to examine whether performance patterns vary across race distances as wind speed changes.
-
 
 ```{r echo=FALSE}
 wind_summary = weather_run %>%
@@ -707,7 +704,7 @@ ggplot(wind_summary, aes(x = wind_group, y = avg_time)) +
   geom_line() +
   geom_point() +
   facet_wrap(~distance_category) +
-  labs(x = "Wind Speed", y = "Average Standardized Race Time")
+  labs(x = "Wind Speed", y = "Average Standardized Race Time", title = "Figure 13: Standardized Race Time by Wind Speed")
 ```
 
 Wind speed shows different patterns across the three distance categories. Long-distance events exhibit a generally decreasing trend in standardized race times as wind speed increases, suggesting that higher recorded wind speeds are associated with faster relative performances in this sample. However, this pattern is irregular and does not necessarily indicate that wind improves performance. Middle-distance events show unusually high standardized times at very low wind speeds, followed by values closer to zero as wind speed increases. Short-distance events display a similar positive spike at low wind speeds, while most remaining intervals fluctuate around or below zero. Because wind direction relative to runners is not accounted for, and several unusual values occur within specific intervals, these findings should be interpreted cautiously.
@@ -722,10 +719,10 @@ Other intervals also showed substantial concentration within individual meets. F
 
 #### RQ2 Seamus
 
-For starters, we had some outliers on standardized time that were over 5 standard deviations away, causing the graphs to look messy and unreadable. We agreed that was too high and they were only 200 or so of those out of the other thousands and thousands of rows. Removed those with more than five standard deviations.
+For starters, we had some outliers on standardized time that were over 5 standard deviations away, causing the graphs to look messy and unreadable. We agreed that was too high, and there were only ~200 of those out of the other thousands of rows. We removed those with more than five standard deviations.
 
-```{r}
-outliers_5 <- only_run %>%
+```{r include=FALSE}
+outliers_5 = only_run %>%
   filter(abs(standardized_time) > 5) %>%
   arrange(desc(abs(standardized_time))) %>%
   select(
