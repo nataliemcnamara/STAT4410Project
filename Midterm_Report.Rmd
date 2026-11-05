@@ -859,7 +859,7 @@ ggplot(top_15_data, aes(x = team_name, y = standardized_time)) +
   geom_boxplot() +
   coord_flip() +
   labs(
-    title = "Figure 17: Athelete Performance Across Team Locations",
+    title = "Figure 17: Athlete Performance Across Team Locations",
     x = "Team",
     y = "Standardized Time"
   )
