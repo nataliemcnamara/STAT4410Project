@@ -53,9 +53,9 @@ This dataset is useful to answer our research questions because it provides us w
 
 ### 3.1 Data Cleaning
 
-The initial dataset contained results from the main collegiate running sports of cross country and track. The stated goal of this study is to look into performance data surrounding the sports of cross country and track; therefore, initial phase of our data cleaning process centered around excluding entries for non-running track events, relay results, and road races from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were used to distinguish eligible running events from other athletic competitions. Furthermore, the last 11 columns were excluded from our analysis since they do not pertain to our stated goals. This leaves 59 available variables and around 160000 observations.
+The initial dataset contained results from the main collegiate running sports of cross country and track. The stated goal of this study is to look into performance data surrounding the sports of cross country and track; therefore, initial phase of our data cleaning process centered around excluding entries for non-running track events, relay results, and road races from the analytical dataset. Standard naming conventions of running events, typically a numerical distance followed by a unit of length such as "5000m", were used to distinguish eligible running events from other athletic competitions. Furthermore, the last 11 columns were excluded from our analysis since they do not pertain to our stated goals. This leaves 59 available variables and around 160,000 observations.
 
-```{r}
+```{r include=FALSE}
 getwd()
 list.files()
 
@@ -63,7 +63,7 @@ run = read.csv('joined.csv')
 dim(run)
 ```
 
-```{r}
+```{r include=FALSE}
 library(dplyr)
 library(stringr)
 library(knitr)
@@ -81,7 +81,7 @@ dim(only_run)
   
 ```
 
-```{r}
+```{r include=FALSE}
 # Next, grab only columns that could pertain to research questions
 # Exclude relay columns, racewalk columns, road races
 
@@ -93,13 +93,13 @@ dim(only_run)
 
 #### Duplication Cleanup
 
-This dataset includes over 21000 rows where the result_ids are duplicated. As a part of the cleaning process, we investigated these rows to determine which ones were exact duplicates. There were 1,653 exact duplicate entries, which left us with 20297 rows that had duplicate `result_id` numbers but were not exact duplicate rows. Initial findings saw that these rows tend to have slight negligible differences in weather measurements, potentially due to multiple weather recordings at a race or track meet. Otherwise, these rows seemed to contain the same result for a unique athlete. 
+This dataset includes over 21,000 rows where the result_ids are duplicated. As a part of the cleaning process, we investigated these rows to determine which ones were exact duplicates. There were 1,653 exact duplicate entries, which left us with 20,297 rows that had duplicate `result_id` numbers but were not exact duplicate rows. Initial findings saw that these rows tend to have slight negligible differences in weather measurements, potentially due to multiple weather recordings at a race or track meet. Otherwise, these rows seemed to contain the same result for a unique athlete. 
 
 To prove this finding, we utilized a pipeline that filtered to duplicate result ID's; summarizing on the ID variables `athlete_id` and `meet_id` helped determine if each duplicated result id had a one-to-one relationship with the athlete and meet. We also used `result_time` to solidify whether these rows contained the same exact result, since the times more strongly identify a unique performance down to the second. Finally, using `count` returned a one-row result indicating that all duplicated result ID's correspond with one unique athlete and result. Thus, we concluded there is a high likelihood these are redundant. We made the decision to accept the first recorded entry for each duplicated result ID, since weather parameters are unlikely to change dramatically in the relatively small amount of race time.
 
-After filtering out all duplicate entries, we are left with ~128000 observations.
+After filtering out all duplicate entries, we are left with ~128,000 observations.
 
-```{r}
+```{r include=FALSE}
 # Filter out exact duplicate entries
 
 only_run = only_run %>% distinct()
@@ -124,13 +124,13 @@ only_run = only_run %>% distinct(result_id, .keep_all = TRUE)
 dim(only_run)
 ```
 
-#### Missing Data Cleanup
+#### Handling Missing Weather Data
 
-For key variables, which include ID variables, location, race classification, race distance, gender, and result time, there is rarely missing data. However, weather and climate variables experience more missing data; according to Karr, Fryer, et al. (2026), "meets from August 2023 onward carry comprehensive course distance, elevation gain and loss, weather at race time, and track venue metadata." Data on meets prior to this have much more limited information on weather, and indoor track meets will, of course, not have weather data present. It is not simple to fill in this missing metadata since each meet and athlete is unique while weather is highly variable; it is also not ideal to just simply omit rows without this metadata as most entries without it are still valid and valuable to other analysis. Thus, it was decided that a boolean variable `weather_true` would be created to help filter on entries that include data; this way, the original data is preserved, while weather analysis can simply filter on this new variable.
+For key variables, which include ID variables, location, race classification, race distance, gender, and result time, there is rarely missing data. However, weather and climate variables experience more missing data; according to Karr, Fryer, et al. (2026), "meets from August 2023 onward carry comprehensive course distance, elevation gain and loss, weather at race time, and track venue metadata." Data on meets prior to this have much more limited information on weather, and indoor track meets will, of course, not have weather data present. 
 
-The new variable `weather_true` was built based on the `temperature` variable, which is always present for every entry that contains weather data.
+Weather variables contain substantial missing data, making it necessary to evaluate their completeness before analysis. Temperature, humidity, and wind speed each have 64.61% missing observations in the cleaned dataset. Other variables, including precipitation (96.32% missing), snow measurements (100%), and UV index (100%), have considerably less available information. Therefore, temperature, humidity, and wind speed were selected as the primary weather variables for our analysis. It was also decided that a boolean variable `weather_true` would be created to help filter on entries that include data; this way, the original data is preserved, while weather analysis can simply filter on this new variable.
 
-```{r}
+```{r include=FALSE}
 # Show that temperature is always present for every entry with weather
 # Should return zero rows since it is always present with other weather
 only_run %>%
@@ -142,10 +142,9 @@ only_run = only_run %>%
   mutate(weather_true = !is.na(temperature))
 ```
 
-#### Weather Data Completeness
+Weather availability also differs by sport. Approximately 49.71% of cross country results and 21.50% of outdoor track results contain temperature measurements, while indoor track results have no recorded temperature data. Rather than removing observations without weather measurements from the entire dataset, we retained them for other research questions and created a separate subset for outdoor weather analysis. This preserves useful performance data while ensuring that weather comparisons use observations with the necessary environmental measurements.
 
-
-```{r}
+```{r include=FALSE}
 only_run %>%
   group_by(sport_name) %>%
   summarise(
@@ -155,12 +154,6 @@ only_run %>%
   ) %>%
   knitr::kable()
 ```
-
-
-Weather variables contain substantial missing data, making it necessary to evaluate their completeness before analysis. Temperature, humidity, and wind speed each have 64.61% missing observations in the cleaned dataset. Other variables, including precipitation (96.32% missing), snow measurements (100%), and UV index (100%), have considerably less available information. Therefore, temperature, humidity, and wind speed were selected as the primary weather variables for our analysis.
-
-Weather availability also differs by sport. Approximately 49.71% of cross country results and 21.50% of outdoor track results contain temperature measurements, while indoor track results have no recorded temperature data. Rather than removing observations without weather measurements from the entire dataset, we retained them for other research questions and created a separate subset for outdoor weather analysis. This preserves useful performance data while ensuring that weather comparisons use observations with the necessary environmental measurements.
-
 
 #### Gender Column Merge
 
